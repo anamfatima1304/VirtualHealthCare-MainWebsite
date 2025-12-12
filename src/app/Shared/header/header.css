@@ -1,0 +1,196 @@
+/* header.component.css */
+.header {
+  background: linear-gradient(135deg, var(--color-navy-blue) 0%, var(--color-dark-blue) 100%);
+  box-shadow: 0 2px 10px rgba(13, 59, 102, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 70px;
+}
+
+.logo h2 {
+  /* color: var(--color-light-blue); */
+  color: white;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.nav-desktop {
+  display: flex;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 30px;
+}
+
+.nav-link {
+  color: var(--color-light-blue);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Hover & Active styles */
+.nav-link:hover,
+.nav-link.active {
+  color: white; /* same as hover */
+  font-weight: 600;
+  transform: scale(1.10);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -5px;
+  left: 0;
+  background: var(--color-sky-blue);
+  transition: width 0.3s ease;
+}
+
+/* Underline appears only for active link, not hover */
+.nav-link.active::after {
+  width: 100%;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-login {
+  background: transparent;
+  color: var(--color-light-blue);
+  border: 2px solid var(--color-medium-blue);
+}
+
+.btn-login:hover {
+  background: var(--color-medium-blue);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-signup {
+  background: linear-gradient(135deg, var(--color-sky-blue) 0%, var(--color-medium-blue) 100%);
+  color: white;
+  border: 2px solid transparent;
+}
+
+.btn-signup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(111, 163, 216, 0.4);
+}
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hamburger {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background: var(--color-light-blue);
+  transition: 0.3s;
+}
+
+.hamburger::before,
+.hamburger::after {
+  content: '';
+  display: block;
+  width: 25px;
+  height: 3px;
+  background: var(--color-light-blue);
+  transition: 0.3s;
+  margin-top: 4px;
+}
+
+/* Mobile Navigation */
+.nav-mobile {
+  display: none;
+  background: var(--color-dark-blue);
+  border-top: 1px solid var(--color-medium-blue);
+}
+
+.nav-mobile.active {
+  display: block;
+}
+
+.nav-links-mobile {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link-mobile {
+  display: block;
+  color: var(--color-light-blue);
+  text-decoration: none;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--color-medium-blue);
+  transition: all 0.3s ease;
+}
+
+/* Mobile Hover & Active */
+.nav-link-mobile:hover,
+.nav-link-mobile.active {
+  background: var(--color-medium-blue);
+  color: white;
+  transform: scale(1.001);
+  font-weight: 600;
+}
+
+.mobile-auth {
+  padding: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .nav-desktop,
+  .auth-buttons {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+}
+

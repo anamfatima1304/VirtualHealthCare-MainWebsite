@@ -1,0 +1,28 @@
+<div class="healthcare-tests-container">
+  <h2 class="page-title">Available Healthcare Tests</h2>
+  
+  <div class="tests-list">
+    <div class="test-item" *ngFor="let test of healthcareTests">
+      <div class="test-header">
+        <h3 class="test-name">{{ test.name }}</h3>
+        <span class="test-price">${{ test.price }}</span>
+      </div>
+      
+      <div class="test-details">
+        <div class="department">
+          <span class="label">Department:</span>
+          <span class="value">{{ test.department }}</span>
+        </div>
+        
+        <div class="timings">
+          <span class="label">Available Slots:</span>
+          <div class="timing-slots">
+            <span class="timing-slot" *ngFor="let timeSlot of test.availableTimeSlots">
+              {{ timeSlot }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

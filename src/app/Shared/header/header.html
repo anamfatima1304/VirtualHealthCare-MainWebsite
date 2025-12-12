@@ -1,0 +1,96 @@
+<header class="header">
+  <div class="header-container">
+    <!-- Logo -->
+    <div class="logo">
+      <h2>HealthCare</h2>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="nav-desktop">
+      <ul class="nav-links">
+        <li>
+          <a [routerLink]="'/'" 
+             [class.active]="isActive('/')" 
+             class="nav-link">Home</a>
+        </li>
+        <li>
+          <a [routerLink]="'/about'" 
+             [class.active]="isActive('/about')" 
+             class="nav-link">About</a>
+        </li>
+        <li>
+          <a [routerLink]="'/doctors'" 
+             [class.active]="isActive('/doctors')" 
+             class="nav-link">Doctors</a>
+        </li>
+        <li>
+          <a [routerLink]="'/services'" 
+             [class.active]="isActive('/services')" 
+             class="nav-link">Test Services</a>
+        </li>
+        <li>
+          <a [routerLink]="'/contact'" 
+             [class.active]="isActive('/contact')" 
+             class="nav-link">Contact Us</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Auth Buttons (Optional) -->
+    <!--
+    <div class="auth-buttons">
+      <button class="btn btn-login">Login</button>
+      <button class="btn btn-signup">Sign Up</button>
+    </div>
+    -->
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" (click)="toggleMenu()">
+      <span class="hamburger"></span>
+    </button>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="nav-mobile" [class.active]="isMenuOpen">
+    <ul class="nav-links-mobile">
+      <li>
+        <a [routerLink]="'/'" 
+           [class.active]="isActive('/')" 
+           class="nav-link-mobile"
+           (click)="closeMenu()">Home</a>
+      </li>
+      <li>
+        <a [routerLink]="'/about'" 
+           [class.active]="isActive('/about')" 
+           class="nav-link-mobile"
+           (click)="closeMenu()">About</a>
+      </li>
+      <li>
+        <a [routerLink]="'/doctors'" 
+           [class.active]="isActive('/doctors')" 
+           class="nav-link-mobile"
+           (click)="closeMenu()">Doctors</a>
+      </li>
+      <li>
+        <a [routerLink]="'/services'" 
+           [class.active]="isActive('/services')" 
+           class="nav-link-mobile"
+           (click)="closeMenu()">Test Services</a>
+      </li>
+      <li>
+        <a [routerLink]="'/contact'" 
+           [class.active]="isActive('/contact')" 
+           class="nav-link-mobile"
+           (click)="closeMenu()">Contact Us</a>
+      </li>
+    </ul>
+
+    <!-- Optional Mobile Auth Buttons -->
+    <!--
+    <div class="mobile-auth">
+      <a class="btn btn-login" routerLink="/login" (click)="closeMenu()">Login</a>
+      <a class="btn btn-signup" routerLink="/signup" (click)="closeMenu()">Sign Up</a>
+    </div>
+    -->
+  </nav>
+</header>

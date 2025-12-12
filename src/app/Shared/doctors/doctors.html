@@ -1,0 +1,157 @@
+<!-- doctors.component.html -->
+<div class="doctors-container">
+  <div class="doctors-header">
+    <h1>Our Medical Team</h1>
+    <p>Meet our experienced and dedicated healthcare professionals</p>
+  </div>
+
+  <!-- Search and Filter Section -->
+  <div class="search-filter-section">
+    <div class="search-controls">
+      <!-- Search Input -->
+      <div class="search-input-container">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+          type="text" 
+          placeholder="Search doctors by name, specialty, or education..."
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+        />
+        <button 
+          class="clear-search-btn" 
+          *ngIf="searchTerm"
+          (click)="searchTerm = ''; onSearchChange()"
+          title="Clear search"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Department Filter -->
+      <div class="department-filter-container">
+        <select 
+          class="department-select"
+          [(ngModel)]="selectedDepartment"
+          (change)="onDepartmentChange()"
+        >
+          <option value="">All Departments</option>
+          <option *ngFor="let department of departments" [value]="department">
+            {{ department }}
+          </option>
+        </select>
+        <i class="fas fa-chevron-down select-arrow"></i>
+      </div>
+
+      <!-- Clear All Filters Button -->
+      <button 
+        class="clear-filters-btn"
+        (click)="clearFilters()"
+        *ngIf="searchTerm || selectedDepartment"
+      >
+        <i class="fas fa-filter-circle-xmark"></i>
+        Clear Filters
+      </button>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-count">
+      <span class="count-text">
+        Showing {{ filteredDoctors.length }} of {{ doctorList.length }} doctors
+      </span>
+    </div>
+  </div>
+
+  <!-- No Results Message -->
+  <div class="no-results" *ngIf="filteredDoctors.length === 0">
+    <div class="no-results-content">
+      <i class="fas fa-user-md-slash"></i>
+      <h3>No doctors found</h3>
+      <p>Try adjusting your search criteria or clearing the filters</p>
+      <button class="btn-clear-filters" (click)="clearFilters()">
+        Clear All Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Doctors Grid -->
+  <div class="doctors-grid" *ngIf="filteredDoctors.length > 0">
+    <div 
+      class="doctor-card" 
+      *ngFor="let doctor of filteredDoctors"
+      (click)="onDoctorClick(doctor)"
+    >
+      <!-- Doctor Image -->
+      <div class="doctor-image-container">
+        <img 
+          [src]="doctor.image" 
+          [alt]="doctor.name"
+          class="doctor-image"
+        />
+        <div class="image-overlay">
+          <div class="overlay-content">
+            <i class="fas fa-user-md"></i>
+            <span>View Profile</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor Info -->
+      <div class="doctor-info">
+        <h3 class="doctor-name">{{ doctor.name }}</h3>
+        <p class="doctor-specialty">{{ doctor.specialty }}</p>
+        
+        <!-- Rating -->
+        <!-- <div class="doctor-rating">
+          <div class="stars">
+            <span 
+              *ngFor="let star of generateStars(doctor.rating)"
+              class="star"
+              [ngClass]="{
+                'star-full': star === 'full',
+                'star-half': star === 'half',
+                'star-empty': star === 'empty'
+              }"
+            >
+              ★
+            </span>
+          </div>
+          <span class="rating-value">{{ doctor.rating }}</span>
+        </div> -->
+
+        <!-- Experience Badge -->
+        <div class="experience-badge">
+          {{ doctor.experience }} experience
+        </div>
+      </div>
+
+      <!-- Hover Details -->
+      <div class="hover-details">
+        <div class="detail-item">
+          <i class="fas fa-graduation-cap"></i>
+          <span>{{ doctor.education }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fas fa-calendar-alt"></i>
+          <span>{{ doctor.availableDays.join(', ') }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fas fa-info-circle"></i>
+          <span>{{ doctor.shortBio }}</span>
+        </div>
+        <div class="detail-item fee">
+          <i class="fas fa-dollar-sign"></i>
+          <span>Consultation: {{ doctor.consultationFee }}</span>
+        </div>
+        <div class="cta-button">
+          <button class="btn-book">Book Appointment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load More Button (for future use) -->
+  <!-- <div class="load-more-section" *ngIf="filteredDoctors.length > 0">
+    <button class="btn-load-more">Load More Doctors</button>
+  </div> -->
+</div>

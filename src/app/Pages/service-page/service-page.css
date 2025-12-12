@@ -1,0 +1,133 @@
+.healthcare-tests-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8f9fa;
+}
+
+.page-title {
+  color: var(--color-navy-blue);
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.tests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.test-item {
+  background: white;
+  border: 1px solid rgba(164, 200, 225, 0.3);
+  /* border-left: 4px solid var(--color-medium-blue); */
+  padding: 20px;
+  border-radius: 0 8px 8px 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(13, 59, 102, 0.1);
+}
+
+.test-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 59, 102, 0.15);
+  background: rgba(164, 200, 225, 0.05);
+}
+
+.test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.test-name {
+  color: var(--color-navy-blue);
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.test-price {
+  background: var(--color-dark-blue);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.test-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.department, .timings {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.label {
+  color: var(--color-medium-blue);
+  font-weight: 600;
+  min-width: 120px;
+  font-size: 14px;
+}
+
+.value {
+  color: var(--color-dark-blue);
+  font-weight: 500;
+}
+
+.timing-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timing-slot {
+  background: rgba(59, 122, 153, 0.1);
+  color: var(--color-dark-blue);
+  border: 1px solid rgba(59, 122, 153, 0.2);
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .healthcare-tests-container {
+    padding: 15px;
+  }
+
+  .test-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .test-name {
+    font-size: 18px;
+  }
+
+  .department, .timings {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .label {
+    min-width: auto;
+  }
+
+  .timing-slot {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+}

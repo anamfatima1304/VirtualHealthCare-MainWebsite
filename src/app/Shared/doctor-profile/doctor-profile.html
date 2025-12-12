@@ -1,0 +1,109 @@
+<!-- doctor-profile.component.html -->
+<div class="profile-container" *ngIf="doctor">
+  <!-- Header Section -->
+  <div class="profile-header">
+    <button class="back-btn" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i>
+      Back to Doctors
+    </button>
+  </div>
+
+  <div class="main-content">
+    <!-- Doctor Info Section -->
+    <div class="doctor-info-section">
+      <div class="doctor-image-wrapper">
+        <img [src]="doctor.image" [alt]="doctor.name" class="doctor-profile-image">
+      </div>
+
+      <div class="doctor-details">
+        <h1 class="doctor-name">{{ doctor.name }}</h1>
+        <p class="doctor-specialty">{{ doctor.specialty }}</p>
+        
+        <!-- Rating -->
+        <!-- <div class="rating-section">
+          <div class="stars">
+            <span 
+              *ngFor="let star of generateStars(doctor.rating)"
+              class="star"
+              [ngClass]="{
+                'star-full': star === 'full',
+                'star-half': star === 'half',
+                'star-empty': star === 'empty'
+              }"
+            >
+              ★
+            </span>
+          </div>
+          <span class="rating-value">{{ doctor.rating }}</span>
+        </div> -->
+
+        <!-- Quick Info -->
+        <div class="quick-info">
+          <div class="info-item">
+            <strong>Education:</strong> {{ doctor.education }}
+          </div>
+          <div class="info-item">
+            <strong>Experience:</strong> {{ doctor.experience }}
+          </div>
+          <div class="info-item">
+            <strong>Consultation Fee:</strong> {{ doctor.consultationFee }}
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="about-section">
+          <h3>About</h3>
+          <p>{{ doctor.shortBio }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Available Timings Section -->
+    <div class="timings-section">
+      <h3 class="section-title">Available Timings</h3>
+      
+      <div class="schedule-list">
+        <div 
+          *ngFor="let day of weekDays" 
+          class="schedule-item"
+          [class.unavailable]="!isDayAvailable(day)"
+        >
+          <div class="day-label">{{ day }}</div>
+          <div class="timing-info">
+            <div *ngIf="isDayAvailable(day)" class="available-times">
+              <span 
+                *ngFor="let timeSlot of getTimeSlotsForDay(day); let last = last" 
+                class="time-slot"
+              >
+                {{ timeSlot.display }}<span *ngIf="!last">, </span>
+              </span>
+            </div>
+            <div *ngIf="!isDayAvailable(day)" class="unavailable-text">
+              Not Available
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Book Appointment Button -->
+      <!-- <div class="booking-section">
+        <button class="book-appointment-btn" (click)="onBookAppointment()">
+          <i class="fas fa-calendar-plus"></i>
+          Book Appointment
+        </button>
+      </div> -->
+    </div>
+  </div>
+</div>
+
+<!-- Loading/Error State -->
+<div class="error-state" *ngIf="!doctor">
+  <div class="error-content">
+    <i class="fas fa-exclamation-triangle"></i>
+    <h3>Doctor Not Found</h3>
+    <p>The requested doctor profile could not be found.</p>
+    <button class="btn-back" (click)="goBack()">
+      Back to Doctors
+    </button>
+  </div>
+</div>

@@ -1,0 +1,72 @@
+<!-- departments.component.html -->
+<div class="departments-container">
+  <div class="departments-header">
+    <h1>Medical Departments</h1>
+    <p>Comprehensive healthcare services across specialized medical departments</p>
+  </div>
+
+  <div class="departments-grid">
+    <div 
+      class="department-card" 
+      *ngFor="let department of departmentList"
+      (click)="onDepartmentClick(department)"
+    >
+      <!-- Department Icon -->
+      <div class="department-icon-container">
+        <div class="icon-circle">
+          <i [class]="department.icon"></i>
+        </div>
+      </div>
+
+      <!-- Department Info -->
+      <div class="department-info">
+        <h3 class="department-name">{{ department.name }}</h3>
+        <p class="department-description">{{ department.description }}</p>
+        
+        <!-- Department Stats -->
+        <div class="department-stats">
+          <div class="stat-item">
+            <i class="fas fa-user-md"></i>
+            <span>{{ department.specialists }} Specialists</span>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Services List -->
+      <div class="services-section">
+        <h4>Key Services</h4>
+        <div class="services-list">
+          <span 
+            class="service-tag" 
+            *ngFor="let service of department.services"
+          >
+            {{ service }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Hover Overlay -->
+      <div class="hover-overlay" (click)="onDepartmentClick(department)">
+        <div class="overlay-content">
+          <i class="fas fa-arrow-right"></i>
+          <span>See Doctors</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Department Statistics -->
+  <div class="department-summary">
+    <div class="summary-stats">
+      <div class="summary-item">
+        <div class="summary-number">{{ departmentList.length }}</div>
+        <div class="summary-label">Departments</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-number">{{ getTotalSpecialists() }}</div>
+        <div class="summary-label">Specialists</div>
+      </div>
+    </div>
+  </div>
+</div>

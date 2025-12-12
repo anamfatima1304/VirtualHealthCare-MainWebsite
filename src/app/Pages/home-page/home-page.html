@@ -1,0 +1,136 @@
+<!-- home.component.html -->
+<main class="home-container">
+
+  <!-- Hero Section with Carousel Background -->
+  <section class="hero-section">
+    <!-- Background Carousel -->
+    <div class="hero-carousel">
+      <div class="carousel-slide" 
+           *ngFor="let image of hospitalImages; let i = index"
+           [class.active]="i === currentSlide">
+        <img [src]="image.image" [alt]="image.title" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Overlay Content -->
+    <div class="hero-overlay">
+      <div class="container">
+        <div class="hero-content">
+          <h1>Welcome to Our Medical Center</h1>
+          <p>We are dedicated to providing exceptional healthcare services with compassion, expertise, and the latest medical technology. Your health and well-being are our top priorities.</p>
+          <div class="action-buttons">
+            <!-- <button class="btn-primary">Schedule Appointment</button> -->
+            <button class="btn-secondary" (click)="goToAbout()">Learn More</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carousel Navigation -->
+    <div class="carousel-navigation">
+      <button class="carousel-btn prev" (click)="prevSlide()" aria-label="Previous image">
+        <span>‹</span>
+      </button>
+      <button class="carousel-btn next" (click)="nextSlide()" aria-label="Next image">
+        <span>›</span>
+      </button>
+    </div>
+
+    <!-- Carousel Indicators -->
+    <div class="carousel-indicators">
+      <button 
+        *ngFor="let image of hospitalImages; let i = index" 
+        class="indicator" 
+        [class.active]="i === currentSlide"
+        (click)="goToSlide(i)"
+        [attr.aria-label]="'Go to slide ' + (i + 1)">
+      </button>
+    </div>
+  </section>
+
+  <!-- Doctors Section -->
+<section class="doctors-section">
+  <h2 class="section-title">Meet Our Specialists</h2>
+  <div class="doctors-carousel-wrapper">
+    <div class="doctors-carousel">
+      <!-- First copy -->
+      <div class="doctor-card" *ngFor="let doctor of doctorList">
+        <div class="doctor-image">
+          <img [src]="doctor.image" [alt]="doctor.name" loading="lazy">
+        </div>
+        <div class="doctor-info">
+          <h3>{{ doctor.name }}</h3>
+          <p class="specialty">{{ doctor.specialty }}</p>
+          <p class="experience">{{ doctor.experience }} experience</p>
+        </div>
+      </div>
+
+      <!-- Duplicate copy (to make seamless loop) -->
+      <div class="doctor-card" *ngFor="let doctor of doctorList">
+        <div class="doctor-image">
+          <img [src]="doctor.image" [alt]="doctor.name" loading="lazy">
+        </div>
+        <div class="doctor-info">
+          <h3>{{ doctor.name }}</h3>
+          <p class="specialty">{{ doctor.specialty }}</p>
+          <p class="experience">{{ doctor.experience }} experience</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+  <!-- Departments Section -->
+  <section class="departments-section">
+    <!-- <div class="container">
+      <h2 class="section-title">Our Departments</h2> -->
+      <app-departments></app-departments>
+    <!-- </div> -->
+  </section>
+
+  <!-- Testing Service -->
+ <section class="test-services">
+  <div class="container">
+    <h2 class="test-title">Comprehensive Test Services</h2>
+    <p class="test-description">
+      Our hospital provides a wide range of comprehensive diagnostic and healthcare test services to support your well-being.
+    </p>
+    <button class="test-btn" (click)="goToTests()">
+      Explore Tests
+    </button>
+  </div>
+</section>
+
+  <!-- Facilities -->
+
+  <section class="facilities-section">
+  <div class="container">
+    <h2 class="section-title">Hospital Facilities</h2>
+    <div class="facilities-content">
+      <div class="amenities-text">
+        <div class="amenities-list">
+          <div class="amenity-item">
+            <h3>Comfortable Waiting Areas</h3>
+            <p>Spacious lounges with comfortable seating and natural lighting</p>
+          </div>
+          <div class="amenity-item">
+            <h3>Private Patient Rooms</h3>
+            <p>Modern rooms with comfortable beds and entertainment systems</p>
+          </div>
+          <div class="amenity-item">
+            <h3>Garden Courtyard</h3>
+            <p>Peaceful outdoor space with seating areas and greenery</p>
+          </div>
+        </div>
+      </div>
+      <div class="facilities-image">
+        <img src="https://cdn.pixabay.com/photo/2016/11/06/10/35/hospital-1802679_1280.jpg" alt="Hospital Interior">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+</main>

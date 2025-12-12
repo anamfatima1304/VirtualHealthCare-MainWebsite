@@ -1,0 +1,100 @@
+<!-- footer.component.html -->
+<footer class="footer">
+  <div class="footer-container">
+    <!-- Top Section -->
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>HealthCare</h3>
+        <p>Providing exceptional healthcare services with compassion and excellence. Your health is our priority.</p>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-linkedin-in"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-instagram"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <div class="link-group">
+          <h4>Quick Links</h4>
+          <ul>
+            <li>
+          <a [routerLink]="'/'" 
+             class="nav-link">Home</a>
+        </li>
+        <li>
+          <a [routerLink]="'/about'" 
+             class="nav-link">About</a>
+        </li>
+        <li>
+          <a [routerLink]="'/doctors'" 
+             class="nav-link">Doctors</a>
+        </li>
+        <li>
+          <a [routerLink]="'/services'" 
+             class="nav-link">Services</a>
+        </li>
+        <!-- <li>
+          <a [routerLink]="'/contact'" 
+             class="nav-link">Contact Us</a>
+        </li> -->
+          </ul>
+        </div>
+
+        <!-- <div class="link-group">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="#">Emergency Care</a></li>
+            <li><a href="#">Surgery</a></li>
+            <li><a href="#">Cardiology</a></li>
+            <li><a href="#">Pediatrics</a></li>
+          </ul>
+        </div> -->
+
+        <div class="link-group">
+          <h4>Contact Info</h4>
+          <div class="contact-info">
+            <p>
+              <i class="fas fa-map-marker-alt"></i>
+              123 Healthcare Ave, Medical City, MC 12345
+            </p>
+            <p>
+              <i class="fas fa-phone"></i>
+              +1 (555) 123-4567
+            </p>
+            <p>
+              <i class="fas fa-envelope"></i>
+              info@healthcare.com
+            </p>
+            <p>
+              <i class="fas fa-clock"></i>
+              24/7 Emergency Services
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <p>&copy; {{ currentYear }} HealthCare. All rights reserved.</p>
+        <!-- <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <span>|</span>
+          <a href="#">Terms of Service</a>
+          <span>|</span>
+          <a href="#">Cookie Policy</a>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</footer>
