@@ -6,6 +6,14 @@ export interface Doctor {
   education: string;
   image: string;
   availableDays: string[];
+  timeSlots?: TimeSlot[]; // Add this
   shortBio: string;
   consultationFee: string;
+}
+
+export interface TimeSlot {
+  day: string;
+  startTime: string;
+  endTime: string;
+  display: string;
 }

@@ -16,6 +16,29 @@
   min-height: 100vh;
 }
 
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.loading-spinner {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.loading-spinner i {
+  font-size: 3rem;
+  color: #4CAF50;
+  margin-bottom: 1rem;
+}
+
+.loading-spinner p {
+  margin-top: 1rem;
+}
+
 /* Header Section */
 .profile-header {
   margin-bottom: 30px;

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './config/database';
 import departmentRoutes from './routes/department.routes';
 import healthTestRoutes from './routes/healthTest.routes';
+import doctorRoutes from './routes/doctor.routes';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/departments', departmentRoutes);
 app.use('/api/health-tests', healthTestRoutes);
+app.use('/api/doctors', doctorRoutes); 
 
 // Health check route
 app.get('/api/health', (req: Request, res: Response) => {

@@ -1,9 +1,10 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Doctors } from '../../Shared/doctors/doctors';
 import { Departments } from '../../Shared/departments/departments';
 import { CommonModule } from '@angular/common';
 import { Doctor } from '../../Shared/Interfaces/Doctor.interface';
+import { Department } from '../../Shared/Interfaces/Department.interface';
 import { DoctorsService } from '../../Data/doctors.service';
+import { DepartmentService } from '../../Data/departments.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -17,8 +18,14 @@ export class HomePage implements OnInit, OnDestroy {
   intervalId: any;
 
   doctorList: Doctor[] = [];
+  departmentList: Department[] = [];
+  loading: boolean = false;
 
-  constructor(private doctorsService: DoctorsService, private router: Router) {}
+  constructor(
+    private doctorsService: DoctorsService,
+    private departmentService: DepartmentService,
+    private router: Router
+  ) {}
 
   isPaused = false;
 
@@ -65,14 +72,49 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.startAutoSlide();
-    // Get doctors from service
-    this.doctorList = this.doctorsService.doctors;
+    this.loadDoctors();
+    this.loadDepartments();
   }
 
   ngOnDestroy() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
+  }
+
+  private loadDoctors(): void {
+    // Load local data immediately
+    this.doctorList = this.doctorsService.doctors;
+
+    // Fetch from backend
+    this.loading = true;
+    this.doctorsService.getAllDoctors().subscribe({
+      next: (doctors) => {
+        console.log('Doctors loaded from backend:', doctors);
+        this.doctorList = doctors;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.log('Backend not available for doctors, using local data');
+        this.loading = false;
+      }
+    });
+  }
+
+  private loadDepartments(): void {
+    // Load local data immediately
+    this.departmentList = this.departmentService.departments;
+
+    // Fetch from backend
+    this.departmentService.getAllDepartments().subscribe({
+      next: (departments) => {
+        console.log('Departments loaded from backend:', departments);
+        this.departmentList = departments;
+      },
+      error: (error) => {
+        console.log('Backend not available for departments, using local data');
+      }
+    });
   }
 
   startAutoSlide() {
@@ -103,14 +145,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   goToTests() {
-    // console.log("Navigate to tests page");
     this.router.navigate(['/services']);
   }
-
-  // @ViewChild('carousel', { static: false }) carousel!: ElementRef;
-
-  // scroll(direction: number) {
-  //   const cardWidth = 330; // card width + gap
-  //   this.carousel.nativeElement.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
-  // }
 }

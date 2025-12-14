@@ -1,4 +1,13 @@
 <!-- doctor-profile.component.html -->
+
+<!-- Loading State -->
+<div class="loading-state" *ngIf="loading && !doctor">
+  <div class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading doctor profile...</p>
+  </div>
+</div>
+
 <div class="profile-container" *ngIf="doctor">
   <!-- Header Section -->
   <div class="profile-header">
@@ -18,24 +27,6 @@
       <div class="doctor-details">
         <h1 class="doctor-name">{{ doctor.name }}</h1>
         <p class="doctor-specialty">{{ doctor.specialty }}</p>
-        
-        <!-- Rating -->
-        <!-- <div class="rating-section">
-          <div class="stars">
-            <span 
-              *ngFor="let star of generateStars(doctor.rating)"
-              class="star"
-              [ngClass]="{
-                'star-full': star === 'full',
-                'star-half': star === 'half',
-                'star-empty': star === 'empty'
-              }"
-            >
-              ★
-            </span>
-          </div>
-          <span class="rating-value">{{ doctor.rating }}</span>
-        </div> -->
 
         <!-- Quick Info -->
         <div class="quick-info">
@@ -75,7 +66,7 @@
                 *ngFor="let timeSlot of getTimeSlotsForDay(day); let last = last" 
                 class="time-slot"
               >
-                {{ timeSlot.display }}<span *ngIf="!last">, </span>
+                {{ timeSlot.display }}<span *ngIf="!last"></span>
               </span>
             </div>
             <div *ngIf="!isDayAvailable(day)" class="unavailable-text">
@@ -84,20 +75,12 @@
           </div>
         </div>
       </div>
-      
-      <!-- Book Appointment Button -->
-      <!-- <div class="booking-section">
-        <button class="book-appointment-btn" (click)="onBookAppointment()">
-          <i class="fas fa-calendar-plus"></i>
-          Book Appointment
-        </button>
-      </div> -->
     </div>
   </div>
 </div>
 
-<!-- Loading/Error State -->
-<div class="error-state" *ngIf="!doctor">
+<!-- Error State -->
+<div class="error-state" *ngIf="!doctor && !loading">
   <div class="error-content">
     <i class="fas fa-exclamation-triangle"></i>
     <h3>Doctor Not Found</h3>
