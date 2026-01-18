@@ -2,7 +2,7 @@
 
     <div class="contact-header">
         <h1>Contact Us</h1>
-        <p>Have any questions or feedback? Send us a message and we’ll get back to you as soon as possible!</p>
+        <p>Have any questions or feedback? Send us a message and we'll get back to you as soon as possible!</p>
     </div>
 
     <div class="contact-container">
@@ -10,7 +10,20 @@
         <!-- Feedback Form -->
         <div class="contact-form card">
             <h2>Send a Message</h2>
-            <form (ngSubmit)="submitForm()" #feedbackForm="ngForm">
+            
+            <!-- Success Message -->
+            <div *ngIf="submitSuccess" class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                Thank you for your feedback! We'll get back to you soon.
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="submitError" class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ errorMessage }}
+            </div>
+
+            <form (ngSubmit)="submitForm(feedbackForm)" #feedbackForm="ngForm">
 
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name" ngModel required placeholder="Your Name">
@@ -21,7 +34,12 @@
                 <label for="message">Message</label>
                 <textarea id="message" name="message" ngModel required placeholder="Your Message"></textarea>
 
-                <button type="submit" [disabled]="!feedbackForm.form.valid">Send Message</button>
+                <button type="submit" [disabled]="!feedbackForm.form.valid || isSubmitting">
+                    <span *ngIf="!isSubmitting">Send Message</span>
+                    <span *ngIf="isSubmitting">
+                        <i class="fas fa-spinner fa-spin"></i> Sending...
+                    </span>
+                </button>
             </form>
         </div>
 

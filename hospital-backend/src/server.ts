@@ -5,6 +5,9 @@ import { connectDB } from './config/database';
 import departmentRoutes from './routes/department.routes';
 import healthTestRoutes from './routes/healthTest.routes';
 import doctorRoutes from './routes/doctor.routes';
+import credentialsRoutes from './routes/credentials.routes';
+import feedbackRoutes from './routes/Feedback.routes';
+import adminRoutes from './routes/Admin.routes';
 
 dotenv.config();
 
@@ -20,11 +23,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/departments', departmentRoutes);
 app.use('/api/health-tests', healthTestRoutes);
 app.use('/api/doctors', doctorRoutes); 
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/admins', adminRoutes);
+app.use('/api/credentials', credentialsRoutes);
 
 // Health check route
 app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'Server is running' });
 });
+
+
 
 // Connect to database and start server
 const startServer = async () => {
