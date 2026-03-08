@@ -9,6 +9,9 @@ import credentialsRoutes from './routes/credentials.routes';
 import feedbackRoutes from './routes/Feedback.routes';
 import adminRoutes from './routes/Admin.routes';
 
+// NEW: Import the appointment routes
+import appointmentRoutes from './routes/appointment.routes';
+
 dotenv.config();
 
 const app: Application = express();
@@ -27,12 +30,13 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/admins', adminRoutes);
 app.use('/api/credentials', credentialsRoutes);
 
+// NEW: Register the appointment routes
+app.use('/api/appointments', appointmentRoutes);
+
 // Health check route
 app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'Server is running' });
 });
-
-
 
 // Connect to database and start server
 const startServer = async () => {
@@ -43,6 +47,8 @@ const startServer = async () => {
       console.log(`Server is running on port ${PORT}`);
       console.log(`Health check: http://localhost:${PORT}/api/health`);
       console.log(`Departments API: http://localhost:${PORT}/api/departments`);
+      // NEW: Log the appointments API URL
+      console.log(`Appointments API: http://localhost:${PORT}/api/appointments`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
