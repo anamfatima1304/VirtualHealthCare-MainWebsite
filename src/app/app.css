@@ -1,0 +1,195 @@
+/* =========================================
+   1. MAIN CONTAINER
+   ========================================= */
+.floating-bot-wrapper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  text-decoration: none;
+}
+
+/* =========================================
+     2. ROBOT ANIMATIONS (BOUNCE & SPIN)
+     ========================================= */
+.robot-bounce-wrapper {
+  /* This wrapper handles the continuous idle bounce */
+  animation: floatBounce 3s ease-in-out infinite;
+}
+
+.custom-robot-img {
+  width: 150px; /* Increased size for a larger robot */
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+
+  /* The image itself handles the 360 spin during the 10s loop */
+  animation: robotSpin 10s ease-in-out infinite;
+}
+
+/* =========================================
+     3. THE DETACHED SPEECH BUBBLE
+     ========================================= */
+.bot-speech-bubble {
+  position: relative;
+  background-color: var(--color-navy-blue);
+  border: 2px solid var(--color-medium-blue);
+  border-radius: 20px 20px 0 20px;
+
+  padding: 12px 18px;
+  width: 220px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(13, 59, 102, 0.4);
+
+  /* Increased margin to lift the bubble higher above the larger robot */
+  margin-bottom: 100px;
+
+  /* --- SHIFTED RIGHT --- 
+     Pushes the bubble rightwards, closer to the robot */
+  left: 25px;
+
+  /* Ensures the bubble stays on top if it overlaps the robot's arm/head */
+  z-index: 2;
+
+  /* Makes the bubble shrink towards the bottom right (towards the robot) */
+  transform-origin: bottom right;
+
+  /* The bubble hides and shows itself in sync with the 10s loop */
+  animation: bubbleCycle 10s ease-in-out infinite;
+}
+
+/* =========================================
+     4. THE ALTERNATING TEXT LOGIC
+     ========================================= */
+.msg-slide {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  color: #ffffff;
+  font-family: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.msg-1 {
+  font-size: 17px;
+  /* Toggles visibility exactly halfway through the 10s loop */
+  animation: hideHalfway 10s step-end infinite;
+}
+
+.msg-2 {
+  font-size: 15px;
+  color: #f0f4f8;
+  /* Hidden for the first half, visible for the second half */
+  animation: showHalfway 10s step-end infinite;
+}
+
+/* =========================================
+     5. MASTER KEYFRAMES (10-Second Loop)
+     ========================================= */
+
+/* The Continuous Idle Bounce (3 seconds) */
+@keyframes floatBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* The Bubble Disappearing Act (10 seconds) */
+@keyframes bubbleCycle {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* The 2.5 second hiding period */
+  40% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  65% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Second hide phase */
+  90% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+/* The Robot 360 Spin (10 seconds) */
+@keyframes robotSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(0deg);
+  }
+
+  /* Spins ONLY while the bubble is hidden (40% to 55%) */
+  55% {
+    transform: rotate(360deg);
+  }
+  90% {
+    transform: rotate(360deg);
+  }
+
+  /* Spins a second time before restarting */
+  100% {
+    transform: rotate(720deg);
+  }
+}
+
+/* Instant Text Swapping (Happens silently while bubble is invisible) */
+@keyframes hideHalfway {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes showHalfway {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
