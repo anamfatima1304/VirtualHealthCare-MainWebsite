@@ -9,7 +9,6 @@ export class CredentialsController {
     try {
       const credentials = await DoctorCredentials.find().sort({ id: 1 });
       
-      // Fetch doctor names for each credential
       const credentialsWithNames = await Promise.all(
         credentials.map(async (cred) => {
           const doctor = await Doctor.findOne({ id: cred.doctorId });
@@ -18,7 +17,7 @@ export class CredentialsController {
             doctorId: cred.doctorId,
             doctorName: doctor?.name || 'Unknown Doctor',
             username: cred.username,
-            // Don't send actual password to frontend
+            email: cred.email,        // ✅ NEW
             hasPassword: true,
             createdAt: cred.createdAt,
             updatedAt: cred.updatedAt
@@ -62,6 +61,7 @@ export class CredentialsController {
           doctorId: credentials.doctorId,
           doctorName: doctor?.name || 'Unknown Doctor',
           username: credentials.username,
+          email: credentials.email,   // ✅ NEW
           hasPassword: true
         }
       });
@@ -98,6 +98,7 @@ export class CredentialsController {
           doctorId: credentials.doctorId,
           doctorName: doctor?.name || 'Unknown Doctor',
           username: credentials.username,
+          email: credentials.email,   // ✅ NEW
           hasPassword: true
         }
       });
@@ -113,13 +114,13 @@ export class CredentialsController {
   // Create new credentials
   async createCredentials(req: Request, res: Response): Promise<void> {
     try {
-      const { doctorId, username, password } = req.body;
+      const { doctorId, username, password, email } = req.body;  // ✅ added email
 
       // Validate required fields
-      if (!doctorId || !username || !password) {
+      if (!doctorId || !username || !password || !email) {        // ✅ validate email
         res.status(400).json({
           success: false,
-          message: 'Doctor ID, username, and password are required'
+          message: 'Doctor ID, username, password, and email are required'
         });
         return;
       }
@@ -156,6 +157,18 @@ export class CredentialsController {
         return;
       }
 
+      // ✅ Check if email already exists
+      const existingCredsByEmail = await DoctorCredentials.findOne({ 
+        email: email.toLowerCase() 
+      });
+      if (existingCredsByEmail) {
+        res.status(400).json({
+          success: false,
+          message: 'Email already exists'
+        });
+        return;
+      }
+
       // Get next ID
       const lastCred = await DoctorCredentials.findOne().sort({ id: -1 });
       const newId = lastCred ? lastCred.id + 1 : 1;
@@ -168,7 +181,8 @@ export class CredentialsController {
         id: newId,
         doctorId,
         username: username.toLowerCase(),
-        password: hashedPassword
+        password: hashedPassword,
+        email: email.toLowerCase()    // ✅ NEW
       });
 
       res.status(201).json({
@@ -179,6 +193,7 @@ export class CredentialsController {
           doctorId: credentials.doctorId,
           doctorName: doctor.name,
           username: credentials.username,
+          email: credentials.email,   // ✅ NEW
           hasPassword: true
         }
       });
@@ -194,7 +209,7 @@ export class CredentialsController {
   // Update credentials
   async updateCredentials(req: Request, res: Response): Promise<void> {
     try {
-      const { username, password } = req.body;
+      const { username, password, email } = req.body;   // ✅ added email
       const credId = parseInt(req.params.id);
 
       const credentials = await DoctorCredentials.findOne({ id: credId });
@@ -209,12 +224,10 @@ export class CredentialsController {
 
       // Update username if provided
       if (username && username !== credentials.username) {
-        // Check if new username already exists
         const existingCreds = await DoctorCredentials.findOne({ 
           username: username.toLowerCase(),
           id: { $ne: credId }
         });
-        
         if (existingCreds) {
           res.status(400).json({
             success: false,
@@ -222,13 +235,28 @@ export class CredentialsController {
           });
           return;
         }
-        
         credentials.username = username.toLowerCase();
       }
 
       // Update password if provided
       if (password) {
         credentials.password = await bcrypt.hash(password, 10);
+      }
+
+      // ✅ Update email if provided
+      if (email && email.toLowerCase() !== credentials.email) {
+        const existingEmail = await DoctorCredentials.findOne({
+          email: email.toLowerCase(),
+          id: { $ne: credId }
+        });
+        if (existingEmail) {
+          res.status(400).json({
+            success: false,
+            message: 'Email already exists'
+          });
+          return;
+        }
+        credentials.email = email.toLowerCase();
       }
 
       await credentials.save();
@@ -243,6 +271,7 @@ export class CredentialsController {
           doctorId: credentials.doctorId,
           doctorName: doctor?.name || 'Unknown Doctor',
           username: credentials.username,
+          email: credentials.email,   // ✅ NEW
           hasPassword: true
         }
       });
@@ -283,7 +312,7 @@ export class CredentialsController {
     }
   }
 
-  // Verify login (for future use)
+  // Verify login
   async verifyLogin(req: Request, res: Response): Promise<void> {
     try {
       const { username, password } = req.body;
@@ -326,7 +355,8 @@ export class CredentialsController {
         data: {
           doctorId: credentials.doctorId,
           doctorName: doctor?.name || 'Unknown Doctor',
-          username: credentials.username
+          username: credentials.username,
+          email: credentials.email    // ✅ NEW
         }
       });
     } catch (error) {
@@ -341,10 +371,8 @@ export class CredentialsController {
   // Seed initial credentials for all doctors
   async seedCredentials(req: Request, res: Response): Promise<void> {
     try {
-      // Clear existing credentials
       await DoctorCredentials.deleteMany({});
 
-      // Get all doctors from database
       const doctors = await Doctor.find().sort({ id: 1 });
 
       if (doctors.length === 0) {
@@ -355,22 +383,20 @@ export class CredentialsController {
         return;
       }
 
-      // Create credentials for each doctor
-      // Format: username = dr.[firstname] (lowercase)
-      // Password = Doctor@123 (you can change this)
       const credentialsData = doctors.map((doctor, index) => {
-        const firstName = doctor.name.split(' ')[1] || doctor.name.split(' ')[0]; // Get first name
+        const firstName = doctor.name.split(' ')[1] || doctor.name.split(' ')[0];
         const username = `dr.${firstName.toLowerCase()}`;
-        
+        const email = `${username}@hospital.com`;   // ✅ auto-generate email for seeding
+
         return {
           id: index + 1,
           doctorId: doctor.id,
-          username: username,
-          password: 'Doctor@123' // Default password - will be hashed
+          username,
+          password: 'Doctor@123',
+          email                                     // ✅ NEW
         };
       });
 
-      // Hash passwords and create credentials
       const credentialsToInsert = await Promise.all(
         credentialsData.map(async (cred) => ({
           ...cred,
@@ -380,7 +406,6 @@ export class CredentialsController {
 
       const credentials = await DoctorCredentials.insertMany(credentialsToInsert);
 
-      // Fetch doctor names for response
       const credentialsWithNames = await Promise.all(
         credentials.map(async (cred) => {
           const doctor = await Doctor.findOne({ id: cred.doctorId });
@@ -389,7 +414,8 @@ export class CredentialsController {
             doctorId: cred.doctorId,
             doctorName: doctor?.name || 'Unknown',
             username: cred.username,
-            defaultPassword: 'Doctor@123' // Show default password in response
+            email: cred.email,                      // ✅ NEW
+            defaultPassword: 'Doctor@123'
           };
         })
       );
