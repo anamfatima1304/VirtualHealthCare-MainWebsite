@@ -1,22 +1,42 @@
 import { Request, Response } from 'express';
 import Appointment from '../models/appointment.model';
 import Doctor from '../models/Doctor.model';
+import Patient from '../models/Patient.model'; // ✅ new import
 
 export class AppointmentController {
-  
-  // 1. Get appointments by doctorId (Dynamic based on logged-in doctor)
+
+  // 1. Get appointments by doctorId — resolves userId → full name
   async getAppointmentsByDoctorId(req: Request, res: Response): Promise<void> {
     try {
       const doctorId = parseInt(req.params.doctorId);
-      
-      const appointments = await Appointment.find({ doctorId: doctorId })
+
+      const appointments = await Appointment.find({ doctorId })
                                             .sort({ appointmentDate: 1, time: 1 });
+
+      // ✅ For each appointment, look up userId in patient_db > patients
+      const resolvedAppointments = await Promise.all(
+        appointments.map(async (appt) => {
+          const apptObj = appt.toObject();
+          const patientUserId = apptObj.patientName; // e.g. "PAT1765520190186763"
+
+          const patient = await Patient.findOne({ userId: patientUserId }).select('firstName lastName');
+
+          if (patient) {
+            // Replace the stored ID with the real full name
+            apptObj.patientName = `${patient.firstName} ${patient.lastName}`;
+          }
+          // If not found, leave as-is so frontend still shows something
+
+          return apptObj;
+        })
+      );
 
       res.status(200).json({
         success: true,
-        count: appointments.length,
-        data: appointments
+        count: resolvedAppointments.length,
+        data: resolvedAppointments
       });
+
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -26,24 +46,20 @@ export class AppointmentController {
     }
   }
 
-  // 2. Update Appointment Status (Confirm, Complete, Cancel)
+  // rest of your methods stay exactly the same...
   async updateStatus(req: Request, res: Response): Promise<void> {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
 
-      // Find by numeric id and update the status
       const updatedAppointment = await Appointment.findOneAndUpdate(
         { id: id },
         { status: status },
-        { new: true } // returns the updated document
+        { new: true }
       );
 
       if (!updatedAppointment) {
-        res.status(404).json({
-          success: false,
-          message: 'Appointment not found'
-        });
+        res.status(404).json({ success: false, message: 'Appointment not found' });
         return;
       }
 
@@ -61,7 +77,6 @@ export class AppointmentController {
     }
   }
 
-  // 3. Seed initial dummy appointments
   async seedAppointments(req: Request, res: Response): Promise<void> {
     try {
       await Appointment.deleteMany({});
@@ -75,7 +90,7 @@ export class AppointmentController {
       const dummyAppointments = [
         {
           id: 1,
-          doctorId: doctors[0].id, // Usually ID 1
+          doctorId: doctors[0].id,
           patientName: 'Ahmed Ali',
           appointmentDate: new Date(),
           time: '10:00 AM',
@@ -84,7 +99,7 @@ export class AppointmentController {
         },
         {
           id: 2,
-          doctorId: 6, // Specific ID for Doctor Dawood
+          doctorId: 6,
           patientName: 'Sara Khan',
           appointmentDate: new Date(),
           time: '11:30 AM',
