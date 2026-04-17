@@ -7,7 +7,41 @@
   --color-gray-light: #f8f9fa;
   --color-gray-medium: #6c757d;
 }
+/* Container for spacing */
+.appointment-action {
+  margin: 24px 0; /* Adds breathing room above and below */
+}
 
+/* The Button Styling */
+.book-appointment-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+  background-color: #0066ff; /* A trustworthy medical blue */
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 8px;
+  text-decoration: none; /* Removes the underline from the 'a' tag */
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 102, 255, 0.2);
+}
+
+/* Hover Effect */
+.book-appointment-btn:hover {
+  background-color: #0052cc; /* Slightly darker blue on hover */
+  transform: translateY(-2px); /* Moves it slightly up */
+  box-shadow: 0 6px 12px rgba(0, 102, 255, 0.3);
+  color: #ffffff;
+}
+
+/* Click/Active Effect */
+.book-appointment-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 102, 255, 0.2);
+}
 .profile-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -272,7 +306,7 @@
 }
 
 .book-appointment-btn {
-  background: linear-gradient(135deg, var(--color-sky-blue), var(--color-medium-blue));
+  background: linear-gradient(135deg, var(--color-navy-blue) 0%, var(--color-dark-blue) 50%, var(--color-medium-blue) 100%);
   color: white;
   border: none;
   padding: 14px 30px;
@@ -292,7 +326,12 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(111, 163, 216, 0.4);
 }
-
+/* Container for spacing and alignment */
+.appointment-action {
+  margin: 24px 0 16px 0; 
+  display: flex; 
+  justify-content: center; /* <--- Change this line to center the button */
+}
 /* Error State */
 .error-state {
   display: flex;

@@ -1,6 +1,3 @@
-<!-- doctor-profile.component.html -->
-
-<!-- Loading State -->
 <div class="loading-state" *ngIf="loading && !doctor">
   <div class="loading-spinner">
     <i class="fas fa-spinner fa-spin"></i>
@@ -9,7 +6,6 @@
 </div>
 
 <div class="profile-container" *ngIf="doctor">
-  <!-- Header Section -->
   <div class="profile-header">
     <button class="back-btn" (click)="goBack()">
       <i class="fas fa-arrow-left"></i>
@@ -18,7 +14,6 @@
   </div>
 
   <div class="main-content">
-    <!-- Doctor Info Section -->
     <div class="doctor-info-section">
       <div class="doctor-image-wrapper">
         <img [src]="doctor.image" [alt]="doctor.name" class="doctor-profile-image">
@@ -28,7 +23,6 @@
         <h1 class="doctor-name">{{ doctor.name }}</h1>
         <p class="doctor-specialty">{{ doctor.specialty }}</p>
 
-        <!-- Quick Info -->
         <div class="quick-info">
           <div class="info-item">
             <strong>Education:</strong> {{ doctor.education }}
@@ -41,15 +35,15 @@
           </div>
         </div>
 
-        <!-- About -->
         <div class="about-section">
           <h3>About</h3>
           <p>{{ doctor.shortBio }}</p>
         </div>
-      </div>
+
+        
+        </div>
     </div>
 
-    <!-- Available Timings Section -->
     <div class="timings-section">
       <h3 class="section-title">Available Timings</h3>
       
@@ -78,8 +72,11 @@
     </div>
   </div>
 </div>
-
-<!-- Error State -->
+<div class="appointment-action">
+  <a href="#" class="book-appointment-btn">
+    <i class="far fa-calendar-check"></i> Book Appointment
+  </a>
+</div>
 <div class="error-state" *ngIf="!doctor && !loading">
   <div class="error-content">
     <i class="fas fa-exclamation-triangle"></i>
