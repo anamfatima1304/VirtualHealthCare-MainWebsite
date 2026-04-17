@@ -412,7 +412,81 @@
     margin-left: 15px;
   }
 }
+/* Container centered */
+.appointment-action {
+  margin: 24px 0 16px 0; 
+  display: flex; 
+  justify-content: center; 
+}
 
+/* The Button Styling with Animation */
+.book-appointment-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #0066ff;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  
+  /* Adds the continuous pulse animation */
+  animation: pulse-ring 1.5s infinite;
+}
+
+/* Hover Effect */
+.book-appointment-btn:hover {
+  background-color: #0052cc;
+  transform: translateY(-3px); /* Lifts up slightly more on hover */
+  box-shadow: 0 8px 15px rgba(0, 102, 255, 0.3); /* Stronger shadow on hover */
+  color: #ffffff;
+  
+  /* Stops the pulse animation when the user is hovering over it */
+  animation: none; 
+}
+
+/* Click/Active Effect */
+.book-appointment-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 102, 255, 0.2);
+}
+/* ---------------------------------------------- */
+/* HEADER LAYOUT                                  */
+/* ---------------------------------------------- */
+.profile-header {
+  display: flex;
+  justify-content: space-between; /* Pushes back button left, book button right */
+  align-items: center; /* Vertically centers them */
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee; /* Optional: adds a nice separator line */
+}
+
+/* Optional: Make the top button slightly more compact */
+.profile-header .header-btn {
+  padding: 12px 40px;
+  font-size: 15px;
+  min-width: 50px;
+  /* Retains all the other animations and colors from .book-appointment-btn */
+}
+/* ---------------------------------------------- */
+/* KEYFRAMES FOR THE PULSE EFFECT                 */
+/* ---------------------------------------------- */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 102, 255, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(0, 102, 255, 0); /* Ring expands and fades out */
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 102, 255, 0);
+  }
+}
 @media (max-width: 480px) {
   .book-appointment-btn {
     width: 100%;

@@ -6,11 +6,16 @@
 </div>
 
 <div class="profile-container" *ngIf="doctor">
+  
   <div class="profile-header">
     <button class="back-btn" (click)="goBack()">
       <i class="fas fa-arrow-left"></i>
       Back to Doctors
     </button>
+
+    <a href="#" class="book-appointment-btn header-btn">
+      <i class="far fa-calendar-check"></i> Book Appointment
+    </a>
   </div>
 
   <div class="main-content">
@@ -39,9 +44,7 @@
           <h3>About</h3>
           <p>{{ doctor.shortBio }}</p>
         </div>
-
-        
-        </div>
+      </div>
     </div>
 
     <div class="timings-section">
@@ -72,11 +75,7 @@
     </div>
   </div>
 </div>
-<div class="appointment-action">
-  <a href="#" class="book-appointment-btn">
-    <i class="far fa-calendar-check"></i> Book Appointment
-  </a>
-</div>
+
 <div class="error-state" *ngIf="!doctor && !loading">
   <div class="error-content">
     <i class="fas fa-exclamation-triangle"></i>
