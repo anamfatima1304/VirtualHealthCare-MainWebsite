@@ -249,4 +249,66 @@ export class AppointmentController {
       });
     }
   }
+
+  // ── 4. Get appointments (Handles Query Params for Booking) ────────────────
+  async getAppointments(req: Request, res: Response): Promise<void> {
+    try {
+      const { doctorId, date } = req.query;
+      const query: any = {};
+
+      if (doctorId) {
+        query.doctorId = parseInt(doctorId as string);
+      }
+
+      if (date) {
+        // Create a date range for the start and end of that specific day
+        const start = new Date(date as string);
+        start.setHours(0, 0, 0, 0);
+        
+        const end = new Date(date as string);
+        end.setHours(23, 59, 59, 999);
+        
+        query.appointmentDate = { $gte: start, $lte: end };
+      }
+
+      const appointments = await Appointment.find(query);
+
+      // Return raw array to match Angular's expected Observable<Appointment[]>
+      res.status(200).json(appointments);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching filtered appointments',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // ── 5. Create new appointment (Handling POST /api/appointments) ────────────
+  async createAppointment(req: Request, res: Response): Promise<void> {
+    try {
+      const appointmentData = req.body;
+
+      // Logic to auto-increment ID if not using MongoDB _id
+      const lastAppt = await Appointment.findOne().sort({ id: -1 });
+      const nextId = lastAppt ? lastAppt.id + 1 : 1;
+
+      const newAppointment = new Appointment({
+        ...appointmentData,
+        id: nextId,
+        status: 'pending'
+      });
+
+      const saved = await newAppointment.save();
+      
+      // Return the saved object to match Angular's Observable<Appointment>
+      res.status(201).json(saved);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error creating appointment',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
 }
