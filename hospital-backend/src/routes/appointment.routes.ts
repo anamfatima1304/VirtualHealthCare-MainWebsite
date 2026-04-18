@@ -14,4 +14,9 @@ router.get('/doctor/:doctorId', appointmentController.getAppointmentsByDoctorId.
 // This matches the updateStatus method in your AppointmentController
 router.put('/:id/status', appointmentController.updateStatus.bind(appointmentController));
 
+// GET /api/appointments?doctorId=...&date=...
+router.get('/', appointmentController.getAppointments.bind(appointmentController));
+
+// POST /api/appointments
+router.post('/', appointmentController.createAppointment.bind(appointmentController));
 export default router;
