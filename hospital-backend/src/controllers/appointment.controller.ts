@@ -297,32 +297,32 @@ export class AppointmentController {
       const end = new Date(year, month - 1, day, 23, 59, 59, 999);
 
       const patientDuplicate = await Appointment.findOne({
-        patientName:     patientName,
-        time:            time,
+        patientName: patientName,
+        time: time,
         appointmentDate: { $gte: start, $lte: end },
-        status:          { $nin: ['cancelled'] }
+        status: { $nin: ['cancelled'] },
       });
-      
+
       if (patientDuplicate) {
         res.status(409).json({
           success: false,
-          message: `You already have an appointment at ${time} on this date. Please select a different slot.`
+          message: `You already have an appointment at ${time} on this date. Please select a different slot.`,
         });
         return;
       }
 
       // ── Duplicate check 2: same doctor, same time slot already booked by anyone
       const slotTaken = await Appointment.findOne({
-        doctorId:        parseInt(doctorId),
-        time:            time,
+        doctorId: parseInt(doctorId),
+        time: time,
         appointmentDate: { $gte: start, $lte: end },
-        status:          { $nin: ['cancelled'] }
+        status: { $nin: ['cancelled'] },
       });
-      
+
       if (slotTaken) {
         res.status(409).json({
           success: false,
-          message: `This time slot is already booked. Please select a different time.`
+          message: `This time slot is already booked. Please select a different time.`,
         });
         return;
       }
@@ -343,6 +343,64 @@ export class AppointmentController {
       res.status(500).json({
         success: false,
         message: 'Error creating appointment',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  // ── Cancel by ID (PATCH /api/appointments/:id) ─────────────
+  async cancelById(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params['id'] as string);
+      const { status } = req.body;
+
+      const updated = await Appointment.findOneAndUpdate(
+        { id },
+        { status: status || 'cancelled' },
+        { new: true }
+      );
+
+      if (!updated) {
+        res.status(404).json({ success: false, message: 'Appointment not found' });
+        return;
+      }
+
+      res.status(200).json(updated);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error cancelling appointment',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  // ── Reschedule by ID (PUT /api/appointments/:id) ───────────
+  async rescheduleById(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params['id'] as string);
+      const appointmentData = req.body;
+
+      const updated = await Appointment.findOneAndUpdate(
+        { id },
+        {
+          appointmentDate: appointmentData.appointmentDate,
+          time: appointmentData.time,
+          status: 'pending',
+        },
+        { new: true }
+      );
+
+      if (!updated) {
+        res.status(404).json({ success: false, message: 'Appointment not found' });
+        return;
+      }
+
+      res.status(200).json(updated);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error rescheduling appointment',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }

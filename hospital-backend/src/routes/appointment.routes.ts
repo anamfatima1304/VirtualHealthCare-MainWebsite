@@ -19,4 +19,8 @@ router.get('/', appointmentController.getAppointments.bind(appointmentController
 
 // POST /api/appointments
 router.post('/', appointmentController.createAppointment.bind(appointmentController));
+
+router.patch('/:id', appointmentController.cancelById.bind(appointmentController));
+router.put('/:id', appointmentController.rescheduleById.bind(appointmentController));
+
 export default router;
