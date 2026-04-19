@@ -1,5 +1,11 @@
 import { Request, Response } from 'express';
 import Admin from '../models/Admin.model';
+import Appointment from '../models/appointment.model';
+import Doctor from '../models/Doctor.model';
+import Patient from '../models/Patient.model';
+import Feedback from '../models/Feedback.model';
+import HealthTest from '../models/HealthTest.model';
+import Department from '../models/Department.model';
 
 export class AdminController {
   // Get all admins
@@ -23,7 +29,7 @@ export class AdminController {
   // Get single admin by ID
   async getAdminById(req: Request, res: Response): Promise<void> {
     try {
-      const admin = await Admin.findOne({ id: parseInt(req.params.id) }).select('-password');
+      const admin = await Admin.findOne({ id: parseInt(req.params.id as string) }).select('-password');
       
       if (!admin) {
         res.status(404).json({
@@ -120,7 +126,7 @@ export class AdminController {
     try {
       // If password is being updated, it will be hashed by the pre-save middleware
       const admin = await Admin.findOneAndUpdate(
-        { id: parseInt(req.params.id) },
+        { id: parseInt(req.params.id as string) },
         req.body,
         { new: true, runValidators: true }
       ).select('-password');
@@ -150,7 +156,7 @@ export class AdminController {
   // Delete admin
   async deleteAdmin(req: Request, res: Response): Promise<void> {
     try {
-      const admin = await Admin.findOneAndDelete({ id: parseInt(req.params.id) });
+      const admin = await Admin.findOneAndDelete({ id: parseInt(req.params.id as string) });
 
       if (!admin) {
         res.status(404).json({
@@ -259,6 +265,167 @@ export class AdminController {
       res.status(500).json({
         success: false,
         message: 'Error seeding admin',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // Get analytics data
+  async getAnalytics(req: Request, res: Response): Promise<void> {
+    try {
+      // Get total counts
+      const [totalPatients, totalDoctors, totalAppointments, totalFeedback, totalHealthTests, totalDepartments] = await Promise.all([
+        Patient.countDocuments(),
+        Doctor.countDocuments(),
+        Appointment.countDocuments(),
+        Feedback.countDocuments(),
+        HealthTest.countDocuments(),
+        Department.countDocuments()
+      ]);
+
+      // Get appointment status distribution
+      const appointmentStatusStats = await Appointment.aggregate([
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $sort: { count: -1 }
+        }
+      ]);
+
+      // Get monthly appointment trends (last 12 months)
+      const monthlyAppointments = await Appointment.aggregate([
+        {
+          $match: {
+            appointmentDate: {
+              $gte: new Date(new Date().getFullYear(), new Date().getMonth() - 11, 1)
+            }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$appointmentDate' },
+              month: { $month: '$appointmentDate' }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $sort: { '_id.year': 1, '_id.month': 1 }
+        }
+      ]);
+
+      // Get department-wise appointment counts
+      const departmentAppointments = await Appointment.aggregate([
+        {
+          $lookup: {
+            from: 'doctors',
+            localField: 'doctorId',
+            foreignField: 'id',
+            as: 'doctor'
+          }
+        },
+        {
+          $unwind: { path: '$doctor', preserveNullAndEmptyArrays: true }
+        },
+        {
+          $lookup: {
+            from: 'departments',
+            localField: 'doctor.department',
+            foreignField: 'name',
+            as: 'department'
+          }
+        },
+        {
+          $unwind: { path: '$department', preserveNullAndEmptyArrays: true }
+        },
+        {
+          $group: {
+            _id: '$department.name',
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $sort: { count: -1 }
+        }
+      ]);
+
+      // Get recent feedback (last 10)
+      const recentFeedback = await Feedback.find()
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select('name message createdAt');
+
+      // Get health test statistics
+      const healthTestStats = await HealthTest.aggregate([
+        {
+          $group: {
+            _id: '$department',
+            count: { $sum: 1 },
+            avgPrice: { $avg: '$price' }
+          }
+        },
+        {
+          $sort: { count: -1 }
+        }
+      ]);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          totals: {
+            patients: totalPatients,
+            doctors: totalDoctors,
+            appointments: totalAppointments,
+            feedback: totalFeedback,
+            healthTests: totalHealthTests,
+            departments: totalDepartments
+          },
+          appointmentStatusStats,
+          monthlyAppointments,
+          departmentAppointments,
+          recentFeedback,
+          healthTestStats
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching analytics data',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // Get dashboard summary (quick stats for dashboard)
+  async getDashboardSummary(req: Request, res: Response): Promise<void> {
+    try {
+      const [totalPatients, totalDoctors, totalAppointments, pendingAppointments, completedAppointments] = await Promise.all([
+        Patient.countDocuments(),
+        Doctor.countDocuments(),
+        Appointment.countDocuments(),
+        Appointment.countDocuments({ status: 'pending' }),
+        Appointment.countDocuments({ status: 'Completed' })
+      ]);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          totalPatients,
+          totalDoctors,
+          totalAppointments,
+          pendingAppointments,
+          completedAppointments
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching dashboard summary',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
