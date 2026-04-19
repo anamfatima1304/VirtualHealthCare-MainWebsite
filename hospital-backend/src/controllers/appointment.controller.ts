@@ -82,7 +82,7 @@ Virtual Patient Support System
 
 export class AppointmentController {
 
-    // ── 3. Seed dummy appointments ─────────────────────────────────────────────
+  // ── 3. Seed dummy appointments ─────────────────────────────────────────────
   async seedAppointments(req: Request, res: Response): Promise<void> {
     try {
       await Appointment.deleteMany({});
@@ -133,7 +133,107 @@ export class AppointmentController {
         error: error instanceof Error ? error.message : 'Unknown'
       });
     }
-  }// ── 0. Get all appointments (Analytics) ─────────────────────────────────────
+  }
+
+  // ── 4. Get appointments (filters for booking system) ───────────────────────
+  async getAppointments(req: Request, res: Response): Promise<void> {
+    try {
+      const { doctorId, date, patientName } = req.query;
+      const query: any = {};
+
+      if (doctorId) {
+        query.doctorId = parseInt(doctorId as string);
+      }
+
+      if (patientName) {
+        query.patientName = patientName;
+      }
+
+      if (date) {
+        const [year, month, day] = (date as string).split('-').map(Number);
+        const start = new Date(year, month - 1, day, 0, 0, 0, 0);
+        const end = new Date(year, month - 1, day, 23, 59, 59, 999);
+        query.appointmentDate = { $gte: start, $lte: end };
+      }
+
+      const appointments = await Appointment.find(query);
+
+      res.status(200).json({
+        success: true,
+        data: appointments
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching appointments',
+        error: error instanceof Error ? error.message : 'Unknown'
+      });
+    }
+  }
+
+  // ── Create appointment ─────────────────────────────────────────────────────
+  async createAppointment(req: Request, res: Response): Promise<void> {
+    try {
+      const appointmentData = req.body;
+
+      const lastAppt = await Appointment.findOne().sort({ id: -1 });
+      const nextId = lastAppt ? lastAppt.id + 1 : 1;
+
+      const newAppointment = new Appointment({
+        ...appointmentData,
+        id: nextId,
+        status: 'pending'
+      });
+
+      const saved = await newAppointment.save();
+
+      res.status(201).json({
+        success: true,
+        data: saved
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error creating appointment',
+        error: error instanceof Error ? error.message : 'Unknown'
+      });
+    }
+  }
+
+  // ── Cancel appointment by id ───────────────────────────────────────────────
+  async cancelById(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id as string);
+
+      const appointment = await Appointment.findOneAndUpdate(
+        { id },
+        { status: 'cancelled' },
+        { new: true }
+      );
+
+      if (!appointment) {
+        res.status(404).json({ success: false, message: 'Appointment not found' });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Appointment cancelled',
+        data: appointment
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Server error',
+        error: error instanceof Error ? error.message : 'Unknown'
+      });
+    }
+  }
+
+  // ── 0. Get all appointments (Analytics) ───────────────────────────────────
   async getAllAppointments(req: Request, res: Response): Promise<void> {
     try {
       const appointments = await Appointment.find().sort({ appointmentDate: 1, time: 1 });
@@ -265,4 +365,35 @@ export class AppointmentController {
       });
     }
   }
+  // ── Reschedule appointment by id ───────────────────────────────────────────
+async rescheduleById(req: Request, res: Response): Promise<void> {
+  try {
+    const id = parseInt(req.params.id as string);
+    const { appointmentDate, time } = req.body;
+
+    const appointment = await Appointment.findOneAndUpdate(
+      { id },
+      { appointmentDate, time, status: 'pending' },
+      { new: true }
+    );
+
+    if (!appointment) {
+      res.status(404).json({ success: false, message: 'Appointment not found' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Appointment rescheduled',
+      data: appointment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error rescheduling appointment',
+      error: error instanceof Error ? error.message : 'Unknown'
+    });
+  }
+}
 }
