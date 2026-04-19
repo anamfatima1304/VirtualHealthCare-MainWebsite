@@ -8,21 +8,21 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'virtualpatientsupport@gmail.com',   // ← your Gmail
-    pass: 'hgll jbar sgnb vdml'              // ← your Gmail App Password
-  }
+    user: 'virtualpatientsupport@gmail.com', // ← your Gmail
+    pass: 'hgll jbar sgnb vdml', // ← your Gmail App Password
+  },
 });
 
 // ── Email helper — handles both confirmed and cancelled ───────────────────────
 async function sendStatusUpdateEmail(
-  patientEmail:  string,
-  patientName:   string,
-  doctorName:    string,
-  date:          string,
-  time:          string,
-  priority:      string,
+  patientEmail: string,
+  patientName: string,
+  doctorName: string,
+  date: string,
+  time: string,
+  priority: string,
   appointmentId: number,
-  status:        'confirmed' | 'cancelled'
+  status: 'confirmed' | 'cancelled'
 ) {
   const isConfirmed = status === 'confirmed';
 
@@ -90,30 +90,31 @@ This is an automated message; please do not reply to this email.
     `;
 
   await transporter.sendMail({
-    from:    'virtualpatientsupport@gmail.com',
-    to:      patientEmail,
+    from: 'virtualpatientsupport@gmail.com',
+    to: patientEmail,
     subject: subject,
-    text:    text
+    text: text,
   });
 }
 
-
 export class AppointmentController {
-
   // ── 1. Get appointments by doctorId ────────────────────────────────────────
   async getAppointmentsByDoctorId(req: Request, res: Response): Promise<void> {
     try {
       const doctorId = parseInt(req.params.doctorId as string);
 
-      const appointments = await Appointment.find({ doctorId })
-                                            .sort({ appointmentDate: 1, time: 1 });
+      const appointments = await Appointment.find({ doctorId }).sort({
+        appointmentDate: 1,
+        time: 1,
+      });
 
       // Resolve userId → real patient name from patient_db
       const resolvedAppointments = await Promise.all(
         appointments.map(async (appt) => {
           const apptObj = appt.toObject();
-          const patient = await Patient.findOne({ userId: apptObj.patientName })
-                                       .select('firstName lastName');
+          const patient = await Patient.findOne({ userId: apptObj.patientName }).select(
+            'firstName lastName'
+          );
           if (patient) {
             apptObj.patientName = `${patient.firstName} ${patient.lastName}`;
           }
@@ -123,15 +124,14 @@ export class AppointmentController {
 
       res.status(200).json({
         success: true,
-        count:   resolvedAppointments.length,
-        data:    resolvedAppointments
+        count: resolvedAppointments.length,
+        data: resolvedAppointments,
       });
-
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'Error fetching appointments',
-        error:   error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -158,24 +158,22 @@ export class AppointmentController {
       if (normalizedStatus === 'confirmed' || normalizedStatus === 'cancelled') {
         try {
           // ✅ Fetch patient from patient_db using userId
-          const patient = await Patient.findOne({ userId: updatedAppointment.patientName })
-                                       .select('firstName lastName email');
+          const patient = await Patient.findOne({ userId: updatedAppointment.patientName }).select(
+            'firstName lastName email'
+          );
 
           // ✅ Fetch doctor from doctors table using numeric doctorId → get real name
-          const doctor = await Doctor.findOne({ id: updatedAppointment.doctorId })
-                                     .select('name');
+          const doctor = await Doctor.findOne({ id: updatedAppointment.doctorId }).select('name');
 
           if (patient && patient.email) {
-            const fullName   = `${patient.firstName} ${patient.lastName}`;
-            const doctorName = doctor ? doctor.name : 'Your Doctor';  // fallback if not found
-            const apptDate   = updatedAppointment.appointmentDate
-                                                 .toISOString()
-                                                 .split('T')[0];
+            const fullName = `${patient.firstName} ${patient.lastName}`;
+            const doctorName = doctor ? doctor.name : 'Your Doctor'; // fallback if not found
+            const apptDate = updatedAppointment.appointmentDate.toISOString().split('T')[0];
 
             await sendStatusUpdateEmail(
               patient.email,
               fullName,
-              doctorName,          // ✅ real doctor name from doctors table
+              doctorName, // ✅ real doctor name from doctors table
               apptDate,
               updatedAppointment.time,
               updatedAppointment.priority,
@@ -183,7 +181,9 @@ export class AppointmentController {
               normalizedStatus as 'confirmed' | 'cancelled'
             );
 
-            console.log(`[EMAIL] ${normalizedStatus} email sent to ${patient.email} | Doctor: ${doctorName}`);
+            console.log(
+              `[EMAIL] ${normalizedStatus} email sent to ${patient.email} | Doctor: ${doctorName}`
+            );
           } else {
             console.log(`[EMAIL] No patient found for userId: ${updatedAppointment.patientName}`);
           }
@@ -195,14 +195,13 @@ export class AppointmentController {
       res.status(200).json({
         success: true,
         message: `Appointment status updated to ${status}`,
-        data:    updatedAppointment
+        data: updatedAppointment,
       });
-
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'Error updating appointment status',
-        error:   error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -220,32 +219,31 @@ export class AppointmentController {
 
       const dummyAppointments = [
         {
-          id:              1,
-          doctorId:        doctors[0].id,
-          patientName:     'Ahmed Ali',
+          id: 1,
+          doctorId: doctors[0].id,
+          patientName: 'Ahmed Ali',
           appointmentDate: new Date(),
-          time:            '10:00 AM',
-          priority:        'High',
-          status:          'pending'
+          time: '10:00 AM',
+          priority: 'High',
+          status: 'pending',
         },
         {
-          id:              2,
-          doctorId:        6,
-          patientName:     'Sara Khan',
+          id: 2,
+          doctorId: 6,
+          patientName: 'Sara Khan',
           appointmentDate: new Date(),
-          time:            '11:30 AM',
-          priority:        'Normal',
-          status:          'pending'
-        }
+          time: '11:30 AM',
+          priority: 'Normal',
+          status: 'pending',
+        },
       ];
 
       const inserted = await Appointment.insertMany(dummyAppointments);
       res.status(201).json({ success: true, count: inserted.length, data: inserted });
-
     } catch (error) {
       res.status(500).json({
         success: false,
-        error:   error instanceof Error ? error.message : 'Unknown'
+        error: error instanceof Error ? error.message : 'Unknown',
       });
     }
   }
@@ -253,61 +251,99 @@ export class AppointmentController {
   // ── 4. Get appointments (Handles Query Params for Booking) ────────────────
   async getAppointments(req: Request, res: Response): Promise<void> {
     try {
-      const { doctorId, date } = req.query;
+      const { doctorId, date, patientName } = req.query;
       const query: any = {};
 
       if (doctorId) {
         query.doctorId = parseInt(doctorId as string);
       }
 
+      if (patientName) {
+        query.patientName = patientName as string;
+      }
+
       if (date) {
-        // Create a date range for the start and end of that specific day
-        const start = new Date(date as string);
-        start.setHours(0, 0, 0, 0);
-        
-        const end = new Date(date as string);
-        end.setHours(23, 59, 59, 999);
-        
+        // Parse YYYY-MM-DD safely without timezone shifting
+        const [year, month, day] = (date as string).split('-').map(Number);
+        const start = new Date(year, month - 1, day, 0, 0, 0, 0);
+        const end = new Date(year, month - 1, day, 23, 59, 59, 999);
         query.appointmentDate = { $gte: start, $lte: end };
       }
 
       const appointments = await Appointment.find(query);
-
-      // Return raw array to match Angular's expected Observable<Appointment[]>
       res.status(200).json(appointments);
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'Error fetching filtered appointments',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
 
-  // ── 5. Create new appointment (Handling POST /api/appointments) ────────────
+  // ── 5. Create new appointment ──────────────────────────────────────────────
   async createAppointment(req: Request, res: Response): Promise<void> {
     try {
       const appointmentData = req.body;
+      const { doctorId, patientName, time, appointmentDate } = appointmentData;
 
-      // Logic to auto-increment ID if not using MongoDB _id
+      // ── Duplicate check 1: same patient, same doctor, same time slot, same day
+      const [year, month, day] = new Date(appointmentDate)
+        .toISOString()
+        .split('T')[0]
+        .split('-')
+        .map(Number);
+      const start = new Date(year, month - 1, day, 0, 0, 0, 0);
+      const end = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+      const patientDuplicate = await Appointment.findOne({
+        patientName:     patientName,
+        time:            time,
+        appointmentDate: { $gte: start, $lte: end },
+        status:          { $nin: ['cancelled'] }
+      });
+      
+      if (patientDuplicate) {
+        res.status(409).json({
+          success: false,
+          message: `You already have an appointment at ${time} on this date. Please select a different slot.`
+        });
+        return;
+      }
+
+      // ── Duplicate check 2: same doctor, same time slot already booked by anyone
+      const slotTaken = await Appointment.findOne({
+        doctorId:        parseInt(doctorId),
+        time:            time,
+        appointmentDate: { $gte: start, $lte: end },
+        status:          { $nin: ['cancelled'] }
+      });
+      
+      if (slotTaken) {
+        res.status(409).json({
+          success: false,
+          message: `This time slot is already booked. Please select a different time.`
+        });
+        return;
+      }
+
+      // ── All clear — create the appointment
       const lastAppt = await Appointment.findOne().sort({ id: -1 });
       const nextId = lastAppt ? lastAppt.id + 1 : 1;
 
       const newAppointment = new Appointment({
         ...appointmentData,
         id: nextId,
-        status: 'pending'
+        status: 'pending',
       });
 
       const saved = await newAppointment.save();
-      
-      // Return the saved object to match Angular's Observable<Appointment>
       res.status(201).json(saved);
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'Error creating appointment',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
