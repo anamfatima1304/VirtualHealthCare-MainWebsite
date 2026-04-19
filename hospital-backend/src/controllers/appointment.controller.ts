@@ -82,7 +82,58 @@ Virtual Patient Support System
 
 export class AppointmentController {
 
-  // ── 0. Get all appointments (Analytics) ─────────────────────────────────────
+    // ── 3. Seed dummy appointments ─────────────────────────────────────────────
+  async seedAppointments(req: Request, res: Response): Promise<void> {
+    try {
+      await Appointment.deleteMany({});
+
+      const doctors = await Doctor.find().limit(2);
+
+      if (doctors.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: 'No doctors found'
+        });
+        return;
+      }
+
+      const dummyAppointments = [
+        {
+          id: 1,
+          doctorId: doctors[0].id,
+          patientName: 'Ahmed Ali',
+          appointmentDate: new Date(),
+          time: '10:00 AM',
+          priority: 'High',
+          status: 'pending',
+        },
+        {
+          id: 2,
+          doctorId: doctors[0].id,
+          patientName: 'Sara Khan',
+          appointmentDate: new Date(),
+          time: '11:30 AM',
+          priority: 'Normal',
+          status: 'pending',
+        },
+      ];
+
+      const inserted = await Appointment.insertMany(dummyAppointments);
+
+      res.status(201).json({
+        success: true,
+        count: inserted.length,
+        data: inserted
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Seed failed',
+        error: error instanceof Error ? error.message : 'Unknown'
+      });
+    }
+  }// ── 0. Get all appointments (Analytics) ─────────────────────────────────────
   async getAllAppointments(req: Request, res: Response): Promise<void> {
     try {
       const appointments = await Appointment.find().sort({ appointmentDate: 1, time: 1 });
