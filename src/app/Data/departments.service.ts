@@ -8,7 +8,7 @@ import { Department } from '../Shared/Interfaces/Department.interface';
   providedIn: 'root'
 })
 export class DepartmentService {
-  private apiUrl = 'http://localhost:3000/api/departments';
+  private apiUrl = 'http://20.13.9.186/hospital/api/departments';
 
   constructor(private http: HttpClient) {}
 
