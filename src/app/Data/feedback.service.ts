@@ -16,7 +16,7 @@ export interface Feedback {
   providedIn: 'root'
 })
 export class FeedbackService {
-  private apiUrl = 'http://20.13.9.186.nip.io/hospital/api/feedback';
+  private apiUrl = 'https://20-13-9-186.nip.io/hospital/api/feedback';
 
   constructor(private http: HttpClient) {}
 
