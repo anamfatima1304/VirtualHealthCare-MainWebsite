@@ -8,6 +8,7 @@ import doctorRoutes from './routes/doctor.routes';
 import credentialsRoutes from './routes/credentials.routes';
 import feedbackRoutes from './routes/Feedback.routes';
 import adminRoutes from './routes/Admin.routes';
+import emergencyRoutes from './routes/emergency.routes';
 
 // NEW: Import doctor model so health route can return doctor data
 import Doctor from './models/Doctor.model';
@@ -24,6 +25,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // Routes
 app.use('/api/departments', departmentRoutes);
 app.use('/api/health-tests', healthTestRoutes);
@@ -31,6 +33,7 @@ app.use('/api/doctors', doctorRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/admins', adminRoutes);
 app.use('/api/credentials', credentialsRoutes);
+app.use('/api/emergency', emergencyRoutes);
 
 // NEW: Register the appointment routes
 app.use('/api/appointments', appointmentRoutes);

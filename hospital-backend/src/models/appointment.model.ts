@@ -1,14 +1,15 @@
+// hospital-backend/src/models/Appointment.model.ts
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IAppointment extends Document {
   id: number;
-  doctorId: number; // References Doctor.id (the numeric ID)
+  doctorId: number;
   patientName: string;
   appointmentDate: Date;
   time: string;
   priority: 'High' | 'Medium' | 'Normal';
-  // Updated status to include 'pending' and 'confirmed' to match your dashboard buttons
   status: 'pending' | 'confirmed' | 'Scheduled' | 'Completed' | 'Cancelled';
+  reason?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -23,7 +24,7 @@ const AppointmentSchema: Schema = new Schema(
     doctorId: {
       type: Number,
       required: true,
-      ref: 'Doctor' // Ensure your Doctor model is also registered as 'Doctor'
+      ref: 'Doctor'
     },
     patientName: {
       type: String,
@@ -45,9 +46,13 @@ const AppointmentSchema: Schema = new Schema(
     },
     status: {
       type: String,
-      // Added 'pending' and 'confirmed' so the database accepts the updates from your buttons
       enum: ['pending', 'confirmed', 'Scheduled', 'Completed', 'Cancelled'],
       default: 'pending'
+    },
+    // Added: optional reason field for priority-based booking
+    reason: {
+      type: String,
+      default: null
     }
   },
   {
@@ -55,5 +60,7 @@ const AppointmentSchema: Schema = new Schema(
   }
 );
 
-// This ensures MongoDB creates the 'appointments' collection
-export default mongoose.model<IAppointment>('Appointment', AppointmentSchema);
+// ✅ Guard against OverwriteModelError when nodemon hot-reloads
+export default mongoose.models['Appointment']
+  ? (mongoose.models['Appointment'] as mongoose.Model<IAppointment>)
+  : mongoose.model<IAppointment>('Appointment', AppointmentSchema);
