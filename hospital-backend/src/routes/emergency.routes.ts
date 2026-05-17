@@ -3,7 +3,7 @@
 // Register in app.ts:  app.use('/api/emergency', emergencyRoutes);
 
 import express, { Request, Response } from 'express';
-import Appointment from '../models/Appointment.model';
+import Appointment from '../models/appointment.model';
 import Doctor from '../models/Doctor.model';
 // ✅ FIX: import email helper directly — no more HTTP call to port 8000
 import { sendEmergencyBumpEmail } from '../controllers/appointment.controller';
@@ -258,11 +258,11 @@ router.post('/book', async (req: Request, res: Response) => {
       // 4b. Send cancellation email to bumped patient (non-blocking)
       try {
         await sendEmergencyBumpEmail(
-          bumpedPatientId,
+          bumpedPatientId!,
           doctorName,
           slotDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
           slotString,
-          bumpedAppointmentId
+          bumpedAppointmentId!
         );
       } catch (emailErr) {
         console.error('⚠️  Bump email failed (non-blocking):', emailErr);
