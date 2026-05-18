@@ -87,24 +87,37 @@ function detectEmergency(reason: string): { isEmergency: boolean; category: stri
 
 // ============================================================
 // HELPER: calculate next 15-min slot from NOW
+// Uses Pakistan timezone (UTC+5) since server runs on UTC
 //   9:05 → "09:15 AM"
 //   9:23 → "09:30 AM"
 //   9:47 → "10:00 AM"
 // ============================================================
 function getNextSlot(): { slotString: string; slotDate: Date } {
-  const now = new Date();
-  const totalMinutes = now.getHours() * 60 + now.getMinutes();
+  const PAKISTAN_OFFSET_MINUTES = 5 * 60; // UTC+5
+
+  const nowUTC = new Date();
+  // Current time in Pakistan
+  const nowPK = new Date(nowUTC.getTime() + PAKISTAN_OFFSET_MINUTES * 60 * 1000);
+
+  const totalMinutes = nowPK.getUTCHours() * 60 + nowPK.getUTCMinutes();
   // Round UP to next multiple of 15
   const nextSlotMinutes = Math.ceil((totalMinutes + 1) / 15) * 15;
 
-  const slotDate = new Date(now);
-  slotDate.setHours(Math.floor(nextSlotMinutes / 60), nextSlotMinutes % 60, 0, 0);
+  // Build slotDate as a real Date in UTC that represents the PK slot time
+  const slotDate = new Date(nowUTC);
+  // Set to the Pakistan slot time expressed in UTC
+  slotDate.setUTCHours(
+    Math.floor(nextSlotMinutes / 60) - 5, // subtract PK offset to get UTC
+    nextSlotMinutes % 60, 0, 0
+  );
 
   const h24 = Math.floor(nextSlotMinutes / 60);
   const m = nextSlotMinutes % 60;
   const ampm = h24 < 12 ? 'AM' : 'PM';
   const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
   const slotString = `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
+
+  console.log(`🕐 PK time: ${h24}:${String(m).padStart(2,'0')} → next slot: ${slotString}`);
 
   return { slotString, slotDate };
 }
@@ -133,7 +146,9 @@ function isDoctorAvailableForSlot(doctor: any, slotDate: Date, slotString: strin
   reason: string;
 } {
   const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const todayDayName = DAY_NAMES[slotDate.getDay()];
+  // ✅ Use Pakistan time for day calculation (UTC+5)
+  const pkDate = new Date(slotDate.getTime() + 5 * 60 * 60 * 1000);
+  const todayDayName = DAY_NAMES[pkDate.getUTCDay()];
 
   // 1. Check if doctor works today at all
   const availableDays: string[] = doctor.availableDays || [];
