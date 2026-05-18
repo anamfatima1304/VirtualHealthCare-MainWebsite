@@ -5,12 +5,14 @@ import Patient from '../models/Patient.model';
 import nodemailer from 'nodemailer';
 
 // ── Email transporter setup ───────────────────────────────────────────────────
-// ✅ Generate a new App Password at: myaccount.google.com → "App passwords"
+const EMAIL_USER = 'healthcare.virtualpatient@gmail.com';
+const EMAIL_PASS = 'jaky safl xtrx cqyf';
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    const EMAIL_USER = 'healthcare.virtualpatient@gmail.com',      // ← your Gmail address
-    const EMAIL_PASS = 'jaky safl xtrx cqyf',  // ← REPLACE with your new 16-char App Password
+    user: EMAIL_USER,
+    pass: EMAIL_PASS,
   },
 });
 
@@ -102,16 +104,14 @@ async function sendStatusUpdateEmail(
     </div>`;
 
   await transporter.sendMail({
-    from: '"Virtual Hospital Care Team" <healthcare.virtualpatient@gmail.com>',
+    from: `"Virtual Hospital Care Team" <${EMAIL_USER}>`,
     to: patientEmail,
     subject,
     html,
   });
 }
 
-// ── Emergency bump email — exported so emergency.routes.ts can import it ─────
-// ✅ FIX Issue 2: instead of calling port 8000 via HTTP (which had wrong password),
-//    emergency.routes.ts now imports and calls this directly — same process, same transporter
+// ── Emergency bump email — exported so emergency.routes.ts can import it ──────
 export async function sendEmergencyBumpEmail(
   patientId: string,
   doctorName: string,
@@ -127,7 +127,7 @@ export async function sendEmergencyBumpEmail(
   const fullName = `${patient.firstName} ${patient.lastName}`;
 
   await transporter.sendMail({
-    from: '"Virtual Hospital Care Team" <healthcare.virtualpatient>',
+    from: `"Virtual Hospital Care Team" <${EMAIL_USER}>`,
     to: patient.email,
     subject: `Important: Your Appointment Has Been Cancelled — Virtual Hospital (#${appointmentId})`,
     html: `
@@ -179,7 +179,10 @@ export class AppointmentController {
     try {
       await Appointment.deleteMany({});
       const doctors = await Doctor.find().limit(2);
-      if (doctors.length === 0) { res.status(400).json({ success: false, message: 'No doctors found' }); return; }
+      if (doctors.length === 0) {
+        res.status(400).json({ success: false, message: 'No doctors found' });
+        return;
+      }
       const inserted = await Appointment.insertMany([
         { id: 1, doctorId: doctors[0].id, patientName: 'Ahmed Ali', appointmentDate: new Date(), time: '10:00 AM', priority: 'High',   status: 'pending' },
         { id: 2, doctorId: doctors[0].id, patientName: 'Sara Khan',  appointmentDate: new Date(), time: '11:30 AM', priority: 'Normal', status: 'pending' },
@@ -190,7 +193,7 @@ export class AppointmentController {
     }
   }
 
-  // ✅ FIX Issue 1: cancelled slots now excluded from slot-availability queries
+  // Cancelled slots are excluded from slot-availability queries
   async getAppointments(req: Request, res: Response): Promise<void> {
     try {
       const { doctorId, date, patientName } = req.query;
@@ -223,21 +226,29 @@ export class AppointmentController {
   async createAppointment(req: Request, res: Response): Promise<void> {
     try {
       const lastAppt = await Appointment.findOne().sort({ id: -1 });
-      const saved = await new Appointment({ ...req.body, id: lastAppt ? lastAppt.id + 1 : 1, status: 'pending' }).save();
+      const saved = await new Appointment({
+        ...req.body,
+        id: lastAppt ? lastAppt.id + 1 : 1,
+        status: 'pending',
+      }).save();
       res.status(201).json({ success: true, data: saved });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Error creating appointment', error: error instanceof Error ? error.message : 'Unknown' });
     }
   }
 
-  // ✅ FIX Issue 2: patient-initiated cancel now sends email
+  // Patient-initiated cancel — sends cancellation email
   async cancelById(req: Request, res: Response): Promise<void> {
     try {
       const id = parseInt(req.params.id as string);
       const appointment = await Appointment.findOneAndUpdate({ id }, { status: 'cancelled' }, { new: true });
-      if (!appointment) { res.status(404).json({ success: false, message: 'Appointment not found' }); return; }
+      if (!appointment) {
+        res.status(404).json({ success: false, message: 'Appointment not found' });
+        return;
+      }
 
       try {
+        // patientName field stores the userId (e.g. "PAT17...")
         const patient = await Patient.findOne({ userId: appointment.patientName }).select('firstName lastName email');
         const doctor  = await Doctor.findOne({ id: appointment.doctorId }).select('name');
         if (patient?.email) {
@@ -294,12 +305,16 @@ export class AppointmentController {
     }
   }
 
+  // Doctor confirms or cancels → sends email to patient
   async updateStatus(req: Request, res: Response): Promise<void> {
     try {
       const id = parseInt(req.params.id as string);
       const { status } = req.body;
       const updated = await Appointment.findOneAndUpdate({ id }, { status }, { new: true });
-      if (!updated) { res.status(404).json({ success: false, message: 'Appointment not found' }); return; }
+      if (!updated) {
+        res.status(404).json({ success: false, message: 'Appointment not found' });
+        return;
+      }
 
       const norm = status.toLowerCase();
       if (norm === 'confirmed' || norm === 'cancelled') {
@@ -312,11 +327,16 @@ export class AppointmentController {
               `${patient.firstName} ${patient.lastName}`,
               doctor ? doctor.name : 'Your Doctor',
               updated.appointmentDate.toISOString().split('T')[0],
-              updated.time, updated.priority, updated.id,
+              updated.time,
+              updated.priority,
+              updated.id,
               norm as 'confirmed' | 'cancelled'
             );
+            console.log(`✉️  Status email (${norm}) sent to ${patient.email} for appointment #${id}`);
           }
-        } catch (e) { console.error('[EMAIL ERROR]', e); }
+        } catch (e) {
+          console.error('[EMAIL ERROR]', e);
+        }
       }
       res.status(200).json({ success: true, message: 'Appointment updated', data: updated });
     } catch (error) {
@@ -328,8 +348,15 @@ export class AppointmentController {
     try {
       const id = parseInt(req.params.id as string);
       const { appointmentDate, time } = req.body;
-      const appointment = await Appointment.findOneAndUpdate({ id }, { appointmentDate, time, status: 'pending' }, { new: true });
-      if (!appointment) { res.status(404).json({ success: false, message: 'Appointment not found' }); return; }
+      const appointment = await Appointment.findOneAndUpdate(
+        { id },
+        { appointmentDate, time, status: 'pending' },
+        { new: true }
+      );
+      if (!appointment) {
+        res.status(404).json({ success: false, message: 'Appointment not found' });
+        return;
+      }
       res.status(200).json({ success: true, message: 'Appointment rescheduled', data: appointment });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Error rescheduling appointment', error: error instanceof Error ? error.message : 'Unknown' });
