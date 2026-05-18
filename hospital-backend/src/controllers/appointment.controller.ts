@@ -102,7 +102,7 @@ async function sendStatusUpdateEmail(
     </div>`;
 
   await transporter.sendMail({
-    from: '"Virtual Hospital Care Team" <virtualpatientsupport@gmail.com>',
+    from: '"Virtual Hospital Care Team" <healthcare.virtualpatient@gmail.com>',
     to: patientEmail,
     subject,
     html,
@@ -127,7 +127,7 @@ export async function sendEmergencyBumpEmail(
   const fullName = `${patient.firstName} ${patient.lastName}`;
 
   await transporter.sendMail({
-    from: '"Virtual Hospital Care Team" <virtualpatientsupport@gmail.com>',
+    from: '"Virtual Hospital Care Team" <healthcare.virtualpatient>',
     to: patient.email,
     subject: `Important: Your Appointment Has Been Cancelled — Virtual Hospital (#${appointmentId})`,
     html: `
