@@ -9,8 +9,8 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'virtualpatientsupport@gmail.com',
-    pass: 'hgll jbar sgnb vdml', // ← REPLACE with your new 16-char App Password
+    const EMAIL_USER = 'healthcare.virtualpatient@gmail.com',      // ← your Gmail address
+    const EMAIL_PASS = 'jaky safl xtrx cqyf',  // ← REPLACE with your new 16-char App Password
   },
 });
 
