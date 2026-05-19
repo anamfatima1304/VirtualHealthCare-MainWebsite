@@ -223,14 +223,46 @@ export class AppointmentController {
     }
   }
 
+  // ── Create appointment — with cross-doctor conflict guard ─────────────────
   async createAppointment(req: Request, res: Response): Promise<void> {
     try {
+      const { patientName, appointmentDate, time } = req.body;
+
+      // ── Conflict check: same patient, same time slot, same calendar day, ANY doctor ──
+      if (patientName && appointmentDate && time) {
+        const date = new Date(appointmentDate);
+        const year  = date.getFullYear();
+        const month = date.getMonth();      // already 0-based from Date
+        const day   = date.getDate();
+
+        const dayStart = new Date(year, month, day,  0,  0,  0,   0);
+        const dayEnd   = new Date(year, month, day, 23, 59, 59, 999);
+
+        const existing = await Appointment.findOne({
+          patientName,
+          time,
+          appointmentDate: { $gte: dayStart, $lte: dayEnd },
+          status: { $nin: ['cancelled', 'Cancelled'] },
+        });
+
+        if (existing) {
+          res.status(409).json({
+            success: false,
+            conflict: true,
+            message: `You already have an appointment at ${time} on this date. Please choose a different time slot.`,
+          });
+          return;
+        }
+      }
+      // ── End conflict check ────────────────────────────────────────────────────
+
       const lastAppt = await Appointment.findOne().sort({ id: -1 });
       const saved = await new Appointment({
         ...req.body,
         id: lastAppt ? lastAppt.id + 1 : 1,
         status: 'pending',
       }).save();
+
       res.status(201).json({ success: true, data: saved });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Error creating appointment', error: error instanceof Error ? error.message : 'Unknown' });
