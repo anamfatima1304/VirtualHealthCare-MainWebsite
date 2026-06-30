@@ -8,7 +8,8 @@ import { Doctor } from '../Shared/Interfaces/Doctor.interface';
   providedIn: 'root'
 })
 export class DoctorsService {
-  private apiUrl = 'https://20-13-9-186.nip.io/hospital/api/doctors';
+  // private apiUrl = 'https://20-13-9-186.nip.io/hospital/api/doctors';
+  private apiUrl = 'http://localhost:3000/api/doctors';
   
   // Keep local data as fallback
   private localDoctors: Doctor[] = [

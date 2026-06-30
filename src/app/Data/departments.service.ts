@@ -8,7 +8,8 @@ import { Department } from '../Shared/Interfaces/Department.interface';
   providedIn: 'root'
 })
 export class DepartmentService {
-  private apiUrl = 'https://20-13-9-186.nip.io/hospital/api/departments';
+  // private apiUrl = 'https://20-13-9-186.nip.io/hospital/api/departments';
+  private apiUrl = 'http://localhost:3000/api/departments';
 
   constructor(private http: HttpClient) {}
 

@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import Appointment from '../models/appointment.model';
+import Admin from '../models/Admin.model';
 import Doctor from '../models/Doctor.model';
 import Patient from '../models/Patient.model';
 import nodemailer from 'nodemailer';
+import bcrypt from 'bcryptjs';
 
 // ── Email transporter setup ───────────────────────────────────────────────────
 const EMAIL_USER = 'healthcare.virtualpatient@gmail.com';
@@ -239,14 +241,9 @@ export class AppointmentController {
       }).save();
       res.status(201).json({ success: true, data: saved });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'Error creating appointment', error: error instanceof Error ? error.message : 'Unknown' }); catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error creating appointment',
-      error: error instanceof Error ? error.message : 'Unknown',
-    });
+      res.status(500).json({ success: false, message: 'Error creating appointment', error: error instanceof Error ? error.message : 'Unknown' });
+    }
   }
-}
 
   // Patient-initiated cancel — sends cancellation email
   async cancelById(req: Request, res: Response): Promise<void> {
@@ -371,6 +368,203 @@ export class AppointmentController {
       res.status(200).json({ success: true, message: 'Appointment rescheduled', data: appointment });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Error rescheduling appointment', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+}
+
+export class AdminController {
+
+  // GET /api/admins — get all admins
+  async getAllAdmins(req: Request, res: Response): Promise<void> {
+    try {
+      const admins = await Admin.find().select('-password');
+      res.status(200).json({ success: true, count: admins.length, data: admins });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error fetching admins', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+
+  // GET /api/admins/:id — get admin by id
+  async getAdminById(req: Request, res: Response): Promise<void> {
+    try {
+      const admin = await Admin.findOne({ id: parseInt(req.params.id as string) }).select('-password');
+      if (!admin) {
+        res.status(404).json({ success: false, message: 'Admin not found' });
+        return;
+      }
+      res.status(200).json({ success: true, data: admin });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error fetching admin', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+
+  // GET /api/admins/email/:email — get admin by email
+  async getAdminByEmail(req: Request, res: Response): Promise<void> {
+    try {
+      const admin = await Admin.findOne({ email: req.params.email as string }).select('-password');
+      if (!admin) {
+        res.status(404).json({ success: false, message: 'Admin not found' });
+        return;
+      }
+      res.status(200).json({ success: true, data: admin });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error fetching admin', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+
+  // POST /api/admins — create new admin
+  async createAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const lastAdmin = await Admin.findOne().sort({ id: -1 });
+      const admin = new Admin({
+        ...req.body,
+        id: lastAdmin ? lastAdmin.id + 1 : 1,
+      });
+      const saved = await admin.save();
+      const { password, ...adminData } = saved.toObject();
+      res.status(201).json({ success: true, data: adminData });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error creating admin', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+
+  // POST /api/admins/login — login admin
+  async loginAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        res.status(400).json({ success: false, message: 'Email and password are required' });
+        return;
+      }
+      const admin = await Admin.findOne({ email });
+      if (!admin) {
+        res.status(401).json({ success: false, message: 'Invalid credentials' });
+        return;
+      }
+      const isMatch = await admin.comparePassword(password);
+      if (!isMatch) {
+        res.status(401).json({ success: false, message: 'Invalid credentials' });
+        return;
+      }
+      const { password: _, ...adminData } = admin.toObject();
+      res.status(200).json({ success: true, data: adminData });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error logging in', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+
+  // PUT /api/admins/:id — update admin
+  async updateAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id as string);
+      const updated = await Admin.findOneAndUpdate({ id }, req.body, { new: true }).select('-password');
+      if (!updated) {
+        res.status(404).json({ success: false, message: 'Admin not found' });
+        return;
+      }
+      res.status(200).json({ success: true, data: updated });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error updating admin', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+
+  // DELETE /api/admins/:id — delete admin
+  async deleteAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id as string);
+      const deleted = await Admin.findOneAndDelete({ id });
+      if (!deleted) {
+        res.status(404).json({ success: false, message: 'Admin not found' });
+        return;
+      }
+      res.status(200).json({ success: true, message: 'Admin deleted' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error deleting admin', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+
+  // POST /api/admins/seed/data — seed admin data
+  async seedAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      await Admin.deleteMany({});
+      const seeded = await Admin.insertMany([
+        {
+          id: 1,
+          firstName: 'Admin',
+          lastName: 'User',
+          phoneNumber: '0300-0000000',
+          email: 'admin@virtualhospital.com',
+          password: 'admin123',
+        },
+      ]);
+      const data = seeded.map((a) => {
+        const { password, ...rest } = a.toObject();
+        return rest;
+      });
+      res.status(201).json({ success: true, count: data.length, data });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error seeding admins', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+
+  // GET /api/admins/analytics/data — get analytics data
+  async getAnalytics(req: Request, res: Response): Promise<void> {
+    try {
+      const totalPatients = await Patient.countDocuments();
+      const totalDoctors = await Doctor.countDocuments();
+      const totalAppointments = await Appointment.countDocuments();
+      const pendingAppointments = await Appointment.countDocuments({ status: 'pending' });
+      const confirmedAppointments = await Appointment.countDocuments({ status: 'confirmed' });
+      const cancelledAppointments = await Appointment.countDocuments({ status: { $in: ['cancelled', 'Cancelled'] } });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          totalPatients,
+          totalDoctors,
+          totalAppointments,
+          pendingAppointments,
+          confirmedAppointments,
+          cancelledAppointments,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error fetching analytics', error: error instanceof Error ? error.message : 'Unknown' });
+    }
+  }
+
+  // GET /api/admins/dashboard/summary — get dashboard summary
+  async getDashboardSummary(req: Request, res: Response): Promise<void> {
+    try {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+      const totalPatients = await Patient.countDocuments();
+      const totalDoctors = await Doctor.countDocuments();
+      const todayAppointments = await Appointment.countDocuments({
+        appointmentDate: { $gte: todayStart, $lte: todayEnd },
+        status: { $nin: ['cancelled', 'Cancelled'] },
+      });
+      const pendingAppointments = await Appointment.countDocuments({ status: 'pending' });
+
+      const recentAppointments = await Appointment.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('id doctorId patientName appointmentDate time priority status');
+
+      res.status(200).json({
+        success: true,
+        data: {
+          totalPatients,
+          totalDoctors,
+          todayAppointments,
+          pendingAppointments,
+          recentAppointments,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error fetching dashboard summary', error: error instanceof Error ? error.message : 'Unknown' });
     }
   }
 }

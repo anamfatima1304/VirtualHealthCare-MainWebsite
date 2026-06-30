@@ -8,7 +8,8 @@ import { HealthTest } from '../Shared/Interfaces/Tests.interface';
   providedIn: 'root'
 })
 export class HealthcareTest {
-  private apiUrl = 'https://20-13-9-186.nip.io/hospital/api/health-tests';
+  // private apiUrl = 'https://20-13-9-186.nip.io/hospital/api/health-tests';
+  private apiUrl = 'http://localhost:3000/api/health-tests';
   
   // Keep local data as fallback
   private localTests: HealthTest[] = [
